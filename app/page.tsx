@@ -13,7 +13,7 @@ interface Listing {
 export default function CloserNet() {
   const [listings, setListings] = useState<Listing[]>([
     { id: 1, title: "Sony WH-1000XM5 Headphones", price: 280, description: "Excellent condition. Barely used.", category: "Audio" },
-    { id: 2, title: "Vintage Leica M6 Camera", price: 1850, description: "Recently serviced with original lens.", category: "Photography" },
+    { id: 2, title: "The Dark Side of the Moon - Pink Floyd (Vinyl)", price: 45, description: "Original pressing in great shape.", category: "Vinyl" },
     { id: 3, title: "MacBook Pro 16\" M3 Max", price: 2450, description: "2024 model. 64GB RAM, 1TB SSD.", category: "Electronics" },
   ]);
 
@@ -25,25 +25,41 @@ export default function CloserNet() {
     title: "", price: "", description: "", category: "Audio"
   });
 
-  // Simulated AI CloserValue
+  // Improved CloserValue AI Estimator
   const getCloserValue = () => {
     const { title, category } = aiInput;
-    let basePrice = 150;
-    if (category === "Audio") basePrice = 220;
-    if (category === "Photography") basePrice = 850;
-    if (category === "Electronics") basePrice = 1200;
+    let basePrice = 50;
 
+    // Base prices by category
+    const categoryPrices: { [key: string]: number } = {
+      "Audio": 180,
+      "Electronics": 900,
+      "Photography": 650,
+      "Collectibles": 350,
+      "Clothes": 45,
+      "Books": 25,
+      "Vinyl": 35,
+      "DVD": 12,
+      "CDs": 15,
+      "Other": 50
+    };
+
+    basePrice = categoryPrices[category] || 50;
+
+    // Keyword adjustments
     const lowerTitle = title.toLowerCase();
-    if (lowerTitle.includes("leica")) basePrice *= 1.8;
-    if (lowerTitle.includes("macbook")) basePrice *= 1.6;
+    if (lowerTitle.includes("leica") || lowerTitle.includes("vintage camera")) basePrice *= 2.2;
+    if (lowerTitle.includes("macbook") || lowerTitle.includes("pro")) basePrice *= 1.7;
+    if (lowerTitle.includes("headphones") || lowerTitle.includes("sony")) basePrice *= 1.3;
+    if (lowerTitle.includes("vinyl") || lowerTitle.includes("pink floyd")) basePrice *= 1.4;
 
-    const estimatedLow = Math.round(basePrice * 0.85);
-    const estimatedHigh = Math.round(basePrice * 1.15);
+    const estimatedLow = Math.round(basePrice * 0.82);
+    const estimatedHigh = Math.round(basePrice * 1.18);
 
     setAiResult({
       estimatedLow,
       estimatedHigh,
-      message: `Based on the last 20 similar sales, we recommend listing between $${estimatedLow}–$${estimatedHigh}.`
+      message: `Based on recent sales in ${category}, we recommend listing between $${estimatedLow} and $${estimatedHigh}.`
     });
   };
 
@@ -78,7 +94,6 @@ export default function CloserNet() {
           <div className="flex items-center gap-6 text-sm">
             <a href="#how" className="hover:text-zinc-400">How it Works</a>
             <a href="#value" className="hover:text-zinc-400">CloserValue AI</a>
-            <a href="#compare" className="hover:text-zinc-400">Compare</a>
             <button 
               onClick={() => setShowForm(!showForm)}
               className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200"
@@ -95,15 +110,16 @@ export default function CloserNet() {
           Closer to real value.<br />Protected by escrow.
         </h1>
         <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-          A simpler peer-to-peer marketplace with ~5% total fees and built-in escrow protection.
+          A simpler peer-to-peer marketplace with ~5% total fees.
         </p>
         <div className="flex gap-4 justify-center">
           <button onClick={() => setShowForm(true)} className="px-8 py-3.5 bg-white text-black rounded-full text-lg font-medium hover:bg-zinc-200">
             Post an Item
           </button>
-          <a href="#value" className="px-8 py-3.5 border border-zinc-700 rounded-full text-lg hover:bg-zinc-900">
+          <button onClick={() => document.getElementById('value')?.scrollIntoView({ behavior: 'smooth' })} 
+                  className="px-8 py-3.5 border border-zinc-700 rounded-full text-lg hover:bg-zinc-900">
             Try CloserValue AI
-          </a>
+          </button>
         </div>
       </section>
 
@@ -112,9 +128,9 @@ export default function CloserNet() {
         <h2 className="text-4xl font-semibold text-center mb-12">How CloserNet Works</h2>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { num: "01", title: "List Your Item", desc: "Post quickly with photos and details. No complicated seller rules or high fees." },
-            { num: "02", title: "Secure Escrow", desc: "Buyer pays into escrow. You only ship once the payment is protected." },
-            { num: "03", title: "Get Paid Fairly", desc: "Funds are released when the buyer confirms delivery. Keep ~95% of your sale." }
+            { num: "01", title: "List Your Item", desc: "Post quickly with photos and details. No complicated rules." },
+            { num: "02", title: "Secure Escrow", desc: "Buyer pays into escrow. You only ship after payment is protected." },
+            { num: "03", title: "Get Paid Fairly", desc: "Money is released when the buyer confirms delivery. Keep ~95%." }
           ].map((step, i) => (
             <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
               <div className="text-5xl font-bold text-zinc-700 mb-6">{step.num}</div>
@@ -128,21 +144,28 @@ export default function CloserNet() {
       {/* CloserValue AI */}
       <section id="value" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800 bg-zinc-900">
         <div className="text-center mb-10">
-          <div className="inline-block px-4 py-1 bg-zinc-800 rounded-full text-sm mb-4">POWERED BY AI</div>
+          <div className="inline-block px-4 py-1 bg-zinc-800 rounded-full text-sm mb-4">AI POWERED</div>
           <h2 className="text-4xl font-semibold mb-4">CloserValue AI</h2>
-          <p className="text-zinc-400">Get a smart price recommendation based on recent sales data.</p>
+          <p className="text-zinc-400">Get a smart price suggestion based on recent sales data.</p>
         </div>
 
         <div className="max-w-md mx-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
           <div className="space-y-4">
             <input type="text" placeholder="Item title" value={aiInput.title} 
               onChange={(e) => setAiInput({...aiInput, title: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
+            
             <select value={aiInput.category} onChange={(e) => setAiInput({...aiInput, category: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg">
               <option value="Audio">Audio</option>
               <option value="Electronics">Electronics</option>
               <option value="Photography">Photography</option>
               <option value="Collectibles">Collectibles</option>
+              <option value="Clothes">Clothes</option>
+              <option value="Books">Books</option>
+              <option value="Vinyl">Vinyl</option>
+              <option value="DVD">DVD</option>
+              <option value="CDs">CDs</option>
             </select>
+
             <button onClick={getCloserValue} className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200">
               Get CloserValue Estimate
             </button>
@@ -150,75 +173,11 @@ export default function CloserNet() {
 
           {aiResult && (
             <div className="mt-6 p-5 bg-zinc-900 border border-zinc-800 rounded-xl">
-              <div className="text-sm text-zinc-400 mb-1">Recommended Price</div>
+              <div className="text-sm text-zinc-400 mb-1">Recommended Listing Price</div>
               <div className="text-3xl font-semibold mb-2">${aiResult.estimatedLow} – ${aiResult.estimatedHigh}</div>
               <p className="text-sm text-zinc-400">{aiResult.message}</p>
             </div>
           )}
-        </div>
-      </section>
-
-      {/* Comparison */}
-      <section id="compare" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-12">CloserNet vs eBay</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border border-zinc-800 rounded-2xl overflow-hidden">
-            <thead className="bg-zinc-900">
-              <tr>
-                <th className="text-left p-6 font-medium">Feature</th>
-                <th className="text-center p-6 font-medium">CloserNet</th>
-                <th className="text-center p-6 font-medium">eBay</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {[
-                ["Total Fees", "~5%", "13%+"],
-                ["Escrow Protection", "Built-in", "Extra cost / limited"],
-                ["Experience", "Simple & modern", "Complex rules"],
-                ["Seller Payout", "~95% of sale", "~87% of sale"],
-                ["Best For", "Used goods & collectibles", "New retail + auctions"]
-              ].map(([feature, closer, ebay], i) => (
-                <tr key={i} className="hover:bg-zinc-900/50">
-                  <td className="p-6 font-medium">{feature}</td>
-                  <td className="p-6 text-center text-green-400">{closer}</td>
-                  <td className="p-6 text-center text-zinc-400">{ebay}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Trust & Safety */}
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800 bg-zinc-900">
-        <h2 className="text-4xl font-semibold text-center mb-12">Trust & Safety</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Escrow Protection</h3>
-            <p className="text-zinc-400">Money is held safely until the buyer confirms they received the item. No more shipping without payment security.</p>
-          </div>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Fair for Both Sides</h3>
-            <p className="text-zinc-400">Buyers get protection. Sellers get paid reliably. We built CloserNet to reduce risk for everyone involved.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-12">Frequently Asked Questions</h2>
-        <div className="space-y-6">
-          {[
-            ["How much does it cost to sell?", "Only about 5% total fees — significantly lower than most marketplaces."],
-            ["How does escrow work?", "Buyer pays into escrow. You ship. Money is released to you once the buyer confirms delivery."],
-            ["Is CloserNet safe?", "Yes. Our escrow system protects both buyers and sellers from common risks."],
-            ["Can I sell anything?", "Most used goods, collectibles, and electronics are welcome. We focus on peer-to-peer sales."],
-          ].map(([q, a], i) => (
-            <div key={i} className="border border-zinc-800 rounded-2xl p-6">
-              <h4 className="font-semibold text-lg mb-2">{q}</h4>
-              <p className="text-zinc-400">{a}</p>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -229,13 +188,20 @@ export default function CloserNet() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <input type="text" placeholder="Item Title" value={newItem.title} onChange={(e) => setNewItem({...newItem, title: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" required />
             <input type="number" placeholder="Price ($)" value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" required />
+            
             <select value={newItem.category} onChange={(e) => setNewItem({...newItem, category: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg">
               <option value="Audio">Audio</option>
               <option value="Electronics">Electronics</option>
               <option value="Photography">Photography</option>
               <option value="Collectibles">Collectibles</option>
+              <option value="Clothes">Clothes</option>
+              <option value="Books">Books</option>
+              <option value="Vinyl">Vinyl</option>
+              <option value="DVD">DVD</option>
+              <option value="CDs">CDs</option>
               <option value="Other">Other</option>
             </select>
+            
             <textarea placeholder="Description" value={newItem.description} onChange={(e) => setNewItem({...newItem, description: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg h-24" />
             <button type="submit" className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200">Post Item</button>
           </form>
@@ -261,10 +227,6 @@ export default function CloserNet() {
           ))}
         </div>
       </section>
-
-      <footer className="border-t border-zinc-800 py-10 text-center text-sm text-zinc-500">
-        CloserNet • Lower Fees • Escrow Protected • Built for Real Sellers
-      </footer>
     </main>
   );
 }
