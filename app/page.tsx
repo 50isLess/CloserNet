@@ -18,7 +18,6 @@ export default function CloserNet() {
   ]);
 
   const [showForm, setShowForm] = useState(false);
-  const [showAI, setShowAI] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
   const [aiInput, setAiInput] = useState({ title: "", category: "Audio" });
 
@@ -114,12 +113,12 @@ export default function CloserNet() {
           >
             Post an Item
           </button>
-          <button 
-            onClick={() => setShowAI(true)}
+          <a
+            href="#value"
             className="px-8 py-3.5 border border-zinc-700 rounded-full text-lg hover:bg-zinc-900 transition-colors"
           >
             Try CloserValue AI
-          </button>
+          </a>
         </div>
       </section>
 
