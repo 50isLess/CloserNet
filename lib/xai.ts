@@ -29,6 +29,9 @@ export function getXaiKeyDiagnostics() {
 
   return {
     vercelEnv: process.env.VERCEL_ENV ?? "unknown",
+    vercelUrl: process.env.VERCEL_URL ?? null,
+    vercelProjectUrl: process.env.VERCEL_PROJECT_PRODUCTION_URL ?? null,
+    gitCommit: process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 7) ?? null,
     resendConfigured: Boolean(process.env.RESEND_API_KEY?.trim()),
     activeKeyName: activeName ?? null,
     expectedName: "XAI_API_KEY",
