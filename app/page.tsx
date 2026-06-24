@@ -183,9 +183,15 @@ export default function CloserNet() {
             </div>
             <div className="text-2xl font-semibold tracking-tight">CloserNet</div>
           </div>
-          <button onClick={() => setShowForm(!showForm)} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
-            {showForm ? "Close" : "Post Item"}
-          </button>
+          <div className="flex items-center gap-6 text-sm">
+            <a href="#how" className="hover:text-zinc-400">How it Works</a>
+            <a href="#value" className="hover:text-zinc-400">CloserValue AI</a>
+            <a href="#compare" className="hover:text-zinc-400">Compare</a>
+            <a href="#faq" className="hover:text-zinc-400">FAQ</a>
+            <button onClick={() => setShowForm(!showForm)} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
+              {showForm ? "Close" : "Post Item"}
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -208,7 +214,7 @@ export default function CloserNet() {
       </section>
 
       {/* How it Works */}
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
+      <section id="how" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
         <h2 className="text-4xl font-semibold text-center mb-12">How CloserNet Works</h2>
         <div className="grid md:grid-cols-3 gap-6">
           {[
@@ -252,6 +258,71 @@ export default function CloserNet() {
               </button>
             </div>
           )}
+        </div>
+      </section>
+
+      {/* CloserNet vs eBay Comparison */}
+      <section id="compare" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
+        <h2 className="text-4xl font-semibold text-center mb-12">CloserNet vs eBay</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full border border-zinc-800 rounded-2xl overflow-hidden">
+            <thead className="bg-zinc-900">
+              <tr>
+                <th className="text-left p-6 font-medium">Feature</th>
+                <th className="text-center p-6 font-medium text-green-400">CloserNet</th>
+                <th className="text-center p-6 font-medium text-zinc-400">eBay</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800">
+              {[
+                ["Total Fees", "~5%", "13%+"],
+                ["Escrow Protection", "Built-in & free", "Extra cost or limited"],
+                ["Shipping Rates", "Calculated from weight & dimensions", "Seller figures it out"],
+                ["Experience", "Simple & modern", "Complex with many rules"],
+                ["Seller Payout", "~95% of sale", "~87% of sale"],
+              ].map(([feature, closer, ebay], i) => (
+                <tr key={i} className="hover:bg-zinc-900/50">
+                  <td className="p-6 font-medium">{feature}</td>
+                  <td className="p-6 text-center text-green-400 font-medium">{closer}</td>
+                  <td className="p-6 text-center text-zinc-400">{ebay}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Trust & Safety */}
+      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800 bg-zinc-900">
+        <h2 className="text-4xl font-semibold text-center mb-12">Trust & Safety Built In</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+            <h3 className="text-2xl font-semibold mb-4">Escrow Protection</h3>
+            <p className="text-zinc-400">Money is held safely until the buyer confirms they received the item. No more shipping without payment security.</p>
+          </div>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+            <h3 className="text-2xl font-semibold mb-4">Shipping + Insurance</h3>
+            <p className="text-zinc-400">Real-time rate estimates from USPS, UPS, and FedEx. Optional insurance protects high-value items in transit.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
+        <h2 className="text-4xl font-semibold text-center mb-12">Frequently Asked Questions</h2>
+        <div className="space-y-6">
+          {[
+            ["How much does it cost to sell?", "Only about 5% total fees — significantly lower than most marketplaces. You keep roughly 95% of every sale."],
+            ["How does escrow work?", "The buyer pays into escrow when they purchase. You ship the item. Funds are released once the buyer confirms delivery."],
+            ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
+            ["Should I add insurance?", "We recommend insurance for items over $100. It costs about 1.5% of the item value and protects against loss or damage in transit."],
+            ["How does CloserValue AI work?", "Enter your item title and category for a demo price range. For a more accurate estimate, use the Grok prompt for a real market suggestion."],
+          ].map(([question, answer], i) => (
+            <div key={i} className="border border-zinc-800 rounded-2xl p-6">
+              <h4 className="font-semibold text-lg mb-2">{question}</h4>
+              <p className="text-zinc-400">{answer}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -366,6 +437,10 @@ export default function CloserNet() {
           </form>
         </section>
       )}
+
+      <footer className="border-t border-zinc-800 py-10 text-center text-sm text-zinc-500">
+        CloserNet • Lower Fees • Escrow Protected • Smart Shipping
+      </footer>
 
       {/* Grok Prompt Modal */}
       {showGrokPrompt && (
