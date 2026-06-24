@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { FeeCalculator } from '@/components/FeeCalculator';
 import { ForumPartners } from '@/components/ForumPartners';
 import { Navbar } from '@/components/Navbar';
 import type { CloserValueResult } from '@/lib/closervalue';
@@ -469,19 +470,8 @@ export default function CloserNet() {
           </table>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4 text-center">
-          {[
-            { price: 50, fee: 3.75, payout: 46.25 },
-            { price: 200, fee: 15, payout: 185 },
-            { price: 1000, fee: 75, payout: 925 },
-          ].map((ex) => (
-            <div key={ex.price} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-              <div className="text-zinc-400 text-sm mb-1">${ex.price} sale</div>
-              <div className="text-2xl font-semibold text-green-400">${ex.payout.toFixed(2)}</div>
-              <div className="text-xs text-zinc-500 mt-1">after ${ex.fee.toFixed(2)} total fees</div>
-            </div>
-          ))}
-        </div>
+        <FeeCalculator />
+
         <p className="text-center text-xs text-zinc-500 mt-6">
           Shipping and optional insurance are paid by the buyer at checkout and are not deducted from your sale price.
         </p>
