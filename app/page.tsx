@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { Logo } from '@/components/Logo';
 
 interface Listing {
   id: number;
@@ -144,7 +145,7 @@ export default function CloserNet() {
     setAiResult({
       low,
       high,
-      message: `Prototype estimate only — uses sample category averages, not live market data. Illustrative range for ${category.toLowerCase()}: $${low} – $${high}.`
+      message: `Suggested range for ${category.toLowerCase()}: $${low} – $${high}.`
     });
   };
 
@@ -159,12 +160,7 @@ export default function CloserNet() {
       {/* Navbar */}
       <nav className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-              <span className="text-black font-bold text-xl">C</span>
-            </div>
-            <div className="text-2xl font-semibold tracking-tight">CloserNet</div>
-          </div>
+          <Logo />
           <div className="flex items-center gap-6 text-sm">
             <a href="#how" className="hover:text-zinc-400">How it Works</a>
             <a href="#escrow" className="hover:text-zinc-400">Escrow</a>
@@ -366,15 +362,8 @@ export default function CloserNet() {
       <section id="value" className="max-w-4xl mx-auto px-6 py-14 border-t border-zinc-800 bg-zinc-900">
         <div className="text-center mb-8">
           <h2 className="text-4xl font-semibold mb-3">CloserValue AI</h2>
-          <p className="text-zinc-300 max-w-lg mx-auto mb-4">
+          <p className="text-zinc-300 max-w-lg mx-auto">
             Enter your item title and category — we match it against sample averages to suggest a fair price range before you list.
-          </p>
-          <div className="inline-block px-4 py-1 bg-amber-900/40 border border-amber-700/50 text-amber-200 rounded-full text-sm mb-4">
-            Prototype — not connected to live pricing data
-          </div>
-          <p className="text-zinc-400 max-w-lg mx-auto">
-            A preview pricing helper that uses sample category averages to suggest a ballpark range.
-            It does not pull real-time comps — use it as a starting point, not a final price.
           </p>
         </div>
 
@@ -385,18 +374,20 @@ export default function CloserNet() {
               {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
             <button onClick={getCloserValue} className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200">
-              Get Prototype Estimate
+              Get Estimate
             </button>
           </div>
 
           {aiResult && (
             <div className="mt-6 p-5 bg-zinc-900 border border-zinc-800 rounded-xl">
-              <div className="text-xs uppercase tracking-wide text-amber-400 mb-1">Prototype estimate only</div>
               <div className="text-3xl font-semibold mb-2">${aiResult.low} – ${aiResult.high}</div>
               <p className="text-sm text-zinc-400 mb-4">{aiResult.message}</p>
-              <button onClick={generateResearchPrompt} className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800">
+              <button onClick={generateResearchPrompt} className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800 mb-4">
                 Copy research prompt (optional)
               </button>
+              <p className="text-xs text-zinc-500 leading-relaxed">
+                * Uses sample category averages, not live market data. Verify with your own research before listing.
+              </p>
             </div>
           )}
         </div>
@@ -407,7 +398,7 @@ export default function CloserNet() {
         <h2 className="text-4xl font-semibold text-center mb-4">Why Sellers Choose CloserNet</h2>
         <p className="text-center text-zinc-400 mb-12">See how we compare to the biggest alternatives.</p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6">
             <h3 className="text-xl font-semibold mb-4 text-green-400">CloserNet</h3>
             <ul className="space-y-2 text-sm">
@@ -440,12 +431,12 @@ export default function CloserNet() {
           </div>
 
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <h3 className="text-xl font-semibold mb-4">OfferUp</h3>
+            <h3 className="text-xl font-semibold mb-4">Mercari</h3>
             <ul className="space-y-2 text-sm text-zinc-400">
-              <li>Low fees but limited protection</li>
-              <li>Mostly local transactions</li>
-              <li>Weak buyer/seller safeguards</li>
-              <li>Basic shipping options</li>
+              <li>10%+ selling fee</li>
+              <li>No built-in escrow</li>
+              <li>Buyer protection varies by case</li>
+              <li>~90% payout to seller</li>
             </ul>
           </div>
         </div>
@@ -456,6 +447,10 @@ export default function CloserNet() {
           Per{" "}
           <a href="https://www.ebay.com/help/selling/fees-credits-invoices/selling-fees?id=4822" className="underline hover:text-zinc-400" target="_blank" rel="noopener noreferrer">
             eBay&apos;s 2026 fee schedule
+          </a>
+          , June 2026. Mercari charges a 10% selling fee plus payment processing on item price and shipping per{" "}
+          <a href="https://www.mercari.com/us/help_center/article/160/" className="underline hover:text-zinc-400" target="_blank" rel="noopener noreferrer">
+            Mercari&apos;s fee policy
           </a>
           , June 2026.
         </p>
@@ -486,10 +481,11 @@ export default function CloserNet() {
         <div className="space-y-6">
           {[
             ["How much does it cost to sell?", "About 5% total: 3% CloserNet platform fee + ~2% payment processing. See the fee breakdown above for examples."],
-            ["How do I get early access?", "Join the waitlist with your email at the top of this page. We'll notify you when seller accounts and checkout go live."],
+            ["How do I post an item?", "Seller accounts and checkout aren't live yet. Join the waitlist at the top of this page with your email — we'll invite early sellers when listing and escrow checkout launch."],
             ["How does escrow work?", "Buyer pays at checkout and funds are held by CloserNet — not the seller. The seller ships once payment is secured. Funds release to the seller after the buyer confirms delivery. See the How Escrow Works section above for the full flow."],
+            ["What happens if the buyer claims the item wasn't as described?", "Either party can open a dispute before funds are released. We may ask for photos, tracking, and messages from both sides, then decide on a full refund, partial refund, or release to the seller based on the evidence. Chargebacks opened outside this process may result in account suspension."],
             ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
-            ["What is CloserValue AI?", "A prototype tool using sample category averages — not live market data. Use it for a ballpark range and verify with your own research before listing."],
+            ["What is CloserValue AI?", "A pricing helper that uses sample category averages to suggest a ballpark range. Use it as a starting point and verify with your own research before listing."],
           ].map(([question, answer], i) => (
             <div key={i} className="border border-zinc-800 rounded-2xl p-6">
               <h4 className="font-semibold text-lg mb-2">{question}</h4>

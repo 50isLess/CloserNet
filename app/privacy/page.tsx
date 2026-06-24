@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Logo } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "Privacy Policy — CloserNet",
@@ -11,9 +12,7 @@ export default function PrivacyPage() {
     <main className="min-h-screen bg-zinc-950 text-white">
       <nav className="border-b border-zinc-800">
         <div className="max-w-3xl mx-auto px-6 py-5 flex justify-between items-center">
-          <Link href="/" className="text-sm text-zinc-400 hover:text-white">
-            ← Back to CloserNet
-          </Link>
+          <Logo />
           <Link href="/terms" className="text-sm text-zinc-400 hover:text-white">
             Terms of Service
           </Link>
