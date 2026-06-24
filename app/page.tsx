@@ -217,7 +217,12 @@ export default function CloserNet() {
 
       if (!res.ok) {
         setAiStatus("error");
-        setAiError(data.error ?? "Something went wrong. Please try again.");
+        const hint = typeof data.hint === "string" ? data.hint : "";
+        setAiError(
+          hint
+            ? `${data.error ?? "Something went wrong."} ${hint}`
+            : (data.error ?? "Something went wrong. Please try again.")
+        );
         return;
       }
 
