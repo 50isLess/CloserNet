@@ -97,9 +97,16 @@ Return ONLY valid JSON in this exact format:
       const errText = await response.text();
       console.error("xAI API error:", response.status, errText);
 
-      if (response.status === 401) {
+      const invalidKey =
+        response.status === 401 ||
+        (response.status === 400 && /incorrect api key|invalid.*api key|unauthorized/i.test(errText));
+
+      if (invalidKey) {
         return NextResponse.json(
-          { error: "Invalid XAI_API_KEY. Generate a new key at console.x.ai and update Vercel." },
+          {
+            error: "Invalid XAI_API_KEY. Generate a new key at console.x.ai, update Vercel, and redeploy.",
+            hint: "Run npm run sync-env after updating .env.local, or paste the new key in Vercel → Settings → Environment Variables.",
+          },
           { status: 502 }
         );
       }
