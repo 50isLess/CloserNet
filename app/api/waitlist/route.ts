@@ -4,6 +4,10 @@ import { addToWaitlist } from "@/lib/waitlist";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function resendErrorMessage(error: { message?: string } | null | undefined) {
+  return error?.message ?? "Unknown Resend error";
+}
+
 export async function GET() {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const from = process.env.RESEND_FROM_EMAIL?.trim() ?? "CloserNet <support@closernet.net>";
@@ -20,6 +24,10 @@ export async function GET() {
       : usingTestSender
         ? "Test sender only delivers to your Resend account email. Verify closernet.net for real signups."
         : "Ready to send confirmation emails to all waitlist signups.",
+    notifyHint:
+      notify.endsWith("@closernet.net") && !usingTestSender
+        ? "To receive signup alerts at support@closernet.net, create that mailbox or forwarding in GoDaddy Email."
+        : undefined,
   });
 }
 
@@ -51,44 +59,65 @@ export async function POST(request: Request) {
       );
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (apiKey) {
-      const resend = new Resend(apiKey);
-      const from = process.env.RESEND_FROM_EMAIL ?? "CloserNet <support@closernet.net>";
-
-      await resend.emails.send({
-        from,
-        to: email,
-        subject: "You're on the CloserNet waitlist",
-        html: `
-          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 520px; color: #18181b;">
-            <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">You're on the list</h1>
-            <p style="color: #52525b; line-height: 1.6; margin-bottom: 16px;">
-              Thanks for joining the CloserNet early access waitlist. We're building a peer-to-peer marketplace
-              with Stripe escrow protection and ~7.5% total seller fees — and you'll be among the first to know when we launch.
-            </p>
-            <p style="color: #52525b; line-height: 1.6;">
-              We'll email you when seller accounts and checkout go live. No spam — just launch updates.
-            </p>
-            <p style="color: #a1a1aa; font-size: 14px; margin-top: 32px;">— The CloserNet team</p>
-          </div>
-        `,
-      });
-
-      const notifyEmail = process.env.WAITLIST_NOTIFY_EMAIL ?? "support@closernet.net";
-      await resend.emails.send({
-        from,
-        to: notifyEmail,
-        subject: `New waitlist signup: ${email}`,
-        text: `New early access signup: ${email}`,
+    const apiKey = process.env.RESEND_API_KEY?.trim();
+    if (!apiKey) {
+      return NextResponse.json({
+        message: "You're in! We'll email you when seller accounts and checkout go live.",
+        emailSent: false,
       });
     }
 
+    const resend = new Resend(apiKey);
+    const from = process.env.RESEND_FROM_EMAIL ?? "CloserNet <support@closernet.net>";
+
+    const confirmation = await resend.emails.send({
+      from,
+      to: email,
+      subject: "You're on the CloserNet waitlist",
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 520px; color: #18181b;">
+          <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">You're on the list</h1>
+          <p style="color: #52525b; line-height: 1.6; margin-bottom: 16px;">
+            Thanks for joining the CloserNet early access waitlist. We're building a peer-to-peer marketplace
+            with Stripe escrow protection and ~7.5% total seller fees — and you'll be among the first to know when we launch.
+          </p>
+          <p style="color: #52525b; line-height: 1.6;">
+            We'll email you when seller accounts and checkout go live. No spam — just launch updates.
+          </p>
+          <p style="color: #a1a1aa; font-size: 14px; margin-top: 32px;">— The CloserNet team</p>
+        </div>
+      `,
+    });
+
+    if (confirmation.error) {
+      console.error("Resend confirmation failed:", confirmation.error);
+      return NextResponse.json(
+        {
+          error: `Could not send confirmation email: ${resendErrorMessage(confirmation.error)}`,
+          hint: "Check Resend → Emails at resend.com for delivery logs. Verify closernet.net is still verified.",
+        },
+        { status: 502 }
+      );
+    }
+
+    const notifyEmail = process.env.WAITLIST_NOTIFY_EMAIL ?? "support@closernet.net";
+    const notification = await resend.emails.send({
+      from,
+      to: notifyEmail,
+      subject: `New waitlist signup: ${email}`,
+      text: `New early access signup: ${email}`,
+    });
+
+    if (notification.error) {
+      console.error("Resend notify failed:", notification.error);
+      // Signup succeeded and customer got confirmation — don't fail the whole request.
+    }
+
     return NextResponse.json({
-      message: apiKey
-        ? "Check your inbox — we just sent a confirmation email."
-        : "You're in! We'll email you when seller accounts and checkout go live.",
-      emailSent: Boolean(apiKey),
+      message: "Check your inbox — we just sent a confirmation email.",
+      emailSent: true,
+      confirmationId: confirmation.data?.id ?? null,
+      notifySent: !notification.error,
     });
   } catch (error) {
     console.error("Waitlist signup failed:", error);
