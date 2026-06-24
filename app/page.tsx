@@ -119,6 +119,7 @@ export default function CloserNet() {
             <a href="#how" className="hover:text-zinc-400">How it Works</a>
             <a href="#value" className="hover:text-zinc-400">CloserValue AI</a>
             <a href="#compare" className="hover:text-zinc-400">Compare</a>
+            <a href="#faq" className="hover:text-zinc-400">FAQ</a>
             <button onClick={() => setShowForm(!showForm)} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
               {showForm ? "Close" : "Post Item"}
             </button>
@@ -236,6 +237,25 @@ export default function CloserNet() {
             <h3 className="text-2xl font-semibold mb-4">Fair for Both Sides</h3>
             <p className="text-zinc-400">Buyers get protection. Sellers get paid reliably. We built CloserNet to reduce risk for everyone involved.</p>
           </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
+        <h2 className="text-4xl font-semibold text-center mb-12">Frequently Asked Questions</h2>
+        <div className="space-y-6">
+          {[
+            ["How much does it cost to sell?", "Only about 5% total fees — significantly lower than most marketplaces. You keep roughly 95% of every sale."],
+            ["How does escrow work?", "The buyer pays into escrow when they purchase. You ship the item. Funds are released to you once the buyer confirms delivery."],
+            ["Is CloserNet safe?", "Yes. Escrow protects buyers from not receiving items and protects sellers from shipping without secured payment."],
+            ["What can I sell?", "Most used goods are welcome — electronics, audio gear, vinyl, books, clothes, collectibles, and more. We focus on peer-to-peer sales."],
+            ["How does CloserValue AI work?", "Enter your item title and category for a demo price range. For a more accurate estimate, use the Grok prompt to get a real market suggestion."],
+          ].map(([question, answer], i) => (
+            <div key={i} className="border border-zinc-800 rounded-2xl p-6">
+              <h4 className="font-semibold text-lg mb-2">{question}</h4>
+              <p className="text-zinc-400">{answer}</p>
+            </div>
+          ))}
         </div>
       </section>
 
