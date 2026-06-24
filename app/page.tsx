@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { FeeCalculator } from '@/components/FeeCalculator';
 import { ForumPartners } from '@/components/ForumPartners';
+import { FormLabel } from '@/components/FormField';
 import { ListingImage } from '@/components/ListingImage';
 import { Navbar } from '@/components/Navbar';
 import type { CloserValueResult } from '@/lib/closervalue';
@@ -175,19 +176,45 @@ export default function CloserNet() {
     ];
   };
 
-  const handleShippingInputsChange = () => {
+  useEffect(() => {
     const w = parseFloat(newItem.weight) || 0;
     const l = parseFloat(newItem.length) || 0;
     const wi = parseFloat(newItem.width) || 0;
     const h = parseFloat(newItem.height) || 0;
     if (w > 0 && l > 0 && wi > 0 && h > 0) {
       setShippingRates(calculateShippingRates(w, l, wi, h));
+    } else {
+      setShippingRates([]);
+      if (!w || !l || !wi || !h) {
+        setNewItem((prev) => (prev.selectedShipping ? { ...prev, selectedShipping: "" } : prev));
+      }
     }
-  };
+  }, [newItem.weight, newItem.length, newItem.width, newItem.height]);
+
+  const hasShippingDimensions =
+    Boolean(newItem.weight) &&
+    Boolean(newItem.length) &&
+    Boolean(newItem.width) &&
+    Boolean(newItem.height);
+
+  const canPostPreview =
+    Boolean(newItem.title.trim()) &&
+    Boolean(newItem.price) &&
+    hasShippingDimensions &&
+    Boolean(newItem.selectedShipping);
+
+  const postPreviewHint = (() => {
+    if (!newItem.title.trim()) return "Enter an item title.";
+    if (!newItem.price) return "Enter a price.";
+    if (!hasShippingDimensions) return "Enter weight and dimensions (L × W × H) to calculate shipping rates.";
+    if (shippingRates.length === 0) return "Check that weight and dimensions are valid numbers.";
+    if (!newItem.selectedShipping) return "Select a shipping method below.";
+    return "";
+  })();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItem.title || !newItem.price || !newItem.selectedShipping) return;
+    if (!canPostPreview) return;
 
     const w = parseFloat(newItem.weight) || 1;
     const l = parseFloat(newItem.length) || 8;
@@ -778,7 +805,10 @@ export default function CloserNet() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-2xl sm:text-3xl font-semibold">Post an Item</h2>
-            <p className="text-zinc-400 text-sm mt-2">Preview flow — saves locally on this page until checkout launches.</p>
+            <p className="text-zinc-400 text-sm mt-2">
+              Preview flow — saves locally on this page until checkout launches. Fields marked{" "}
+              <span className="text-red-400">*</span> are required.
+            </p>
           </div>
           <button
             onClick={() => setShowForm(!showForm)}
@@ -789,46 +819,143 @@ export default function CloserNet() {
         </div>
 
         {showForm && (
-          <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-8 space-y-4 shadow-lg shadow-black/20">
-            <input type="text" placeholder="Item Title" value={newItem.title} onChange={(e) => setNewItem({...newItem, title: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg" required />
-            <input type="number" placeholder="Price ($)" value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg" required />
-            <select value={newItem.category} onChange={(e) => setNewItem({...newItem, category: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg">
-              {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
-            </select>
-            <div className="grid grid-cols-2 gap-4">
-              <input type="number" step="0.1" placeholder="Weight (lbs)" value={newItem.weight} onChange={(e) => { setNewItem({...newItem, weight: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
-              <div className="grid grid-cols-3 gap-2">
-                <input type="number" placeholder="L" value={newItem.length} onChange={(e) => { setNewItem({...newItem, length: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
-                <input type="number" placeholder="W" value={newItem.width} onChange={(e) => { setNewItem({...newItem, width: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
-                <input type="number" placeholder="H" value={newItem.height} onChange={(e) => { setNewItem({...newItem, height: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
+          <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-8 space-y-5 shadow-lg shadow-black/20">
+            <div>
+              <FormLabel htmlFor="post-title" required>Item title</FormLabel>
+              <input
+                id="post-title"
+                type="text"
+                placeholder="e.g. Sony WH-1000XM5"
+                value={newItem.title}
+                onChange={(e) => setNewItem({ ...newItem, title: e.target.value })}
+                className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-zinc-500"
+                required
+              />
+            </div>
+
+            <div>
+              <FormLabel htmlFor="post-price" required>Price (USD)</FormLabel>
+              <input
+                id="post-price"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                value={newItem.price}
+                onChange={(e) => setNewItem({ ...newItem, price: e.target.value })}
+                className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-zinc-500"
+                required
+              />
+            </div>
+
+            <div>
+              <FormLabel htmlFor="post-category" required>Category</FormLabel>
+              <select
+                id="post-category"
+                value={newItem.category}
+                onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-zinc-500"
+                required
+              >
+                {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
+              </select>
+            </div>
+
+            <div>
+              <FormLabel required hint="Needed to estimate USPS, UPS, and FedEx rates.">
+                Weight &amp; dimensions
+              </FormLabel>
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  id="post-weight"
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  placeholder="Weight (lbs)"
+                  aria-label="Weight in pounds"
+                  value={newItem.weight}
+                  onChange={(e) => setNewItem({ ...newItem, weight: e.target.value })}
+                  className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-zinc-500"
+                  required
+                />
+                <div className="grid grid-cols-3 gap-2">
+                  <input type="number" min="0" placeholder="L (in)" aria-label="Length in inches" value={newItem.length} onChange={(e) => setNewItem({ ...newItem, length: e.target.value })} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-zinc-500" required />
+                  <input type="number" min="0" placeholder="W (in)" aria-label="Width in inches" value={newItem.width} onChange={(e) => setNewItem({ ...newItem, width: e.target.value })} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-zinc-500" required />
+                  <input type="number" min="0" placeholder="H (in)" aria-label="Height in inches" value={newItem.height} onChange={(e) => setNewItem({ ...newItem, height: e.target.value })} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-zinc-500" required />
+                </div>
               </div>
             </div>
-            {shippingRates.length > 0 && (
-              <div className="bg-zinc-950 border border-zinc-700 rounded-xl p-4">
-                <p className="text-sm text-zinc-400 mb-3">Estimated shipping rates:</p>
-                {shippingRates.map((rate) => (
-                  <button
-                    key={rate.method}
-                    type="button"
-                    onClick={() => setNewItem({ ...newItem, selectedShipping: rate.method })}
-                    className={`w-full flex justify-between items-center p-3 rounded-lg mb-2 transition-colors ${newItem.selectedShipping === rate.method ? "bg-white text-black" : "hover:bg-zinc-800"}`}
-                  >
-                    <div className="text-left">
-                      <div className="font-medium">{rate.method}</div>
-                      <div className="text-xs opacity-70">{rate.days}</div>
-                    </div>
-                    <div className="font-semibold">${rate.cost}</div>
-                  </button>
-                ))}
-              </div>
+
+            <div>
+              <FormLabel required hint="Choose one rate after entering weight and dimensions.">
+                Shipping method
+              </FormLabel>
+              {shippingRates.length > 0 ? (
+                <div className="bg-zinc-950 border border-zinc-700 rounded-xl p-4">
+                  {shippingRates.map((rate) => (
+                    <button
+                      key={rate.method}
+                      type="button"
+                      onClick={() => setNewItem({ ...newItem, selectedShipping: rate.method })}
+                      className={`w-full flex justify-between items-center p-3 rounded-lg mb-2 last:mb-0 transition-colors ${newItem.selectedShipping === rate.method ? "bg-white text-black" : "hover:bg-zinc-800"}`}
+                    >
+                      <div className="text-left">
+                        <div className="font-medium">{rate.method}</div>
+                        <div className="text-xs opacity-70">{rate.days}</div>
+                      </div>
+                      <div className="font-semibold">${rate.cost}</div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-500 bg-zinc-950 border border-dashed border-zinc-700 rounded-lg p-4">
+                  Enter weight and dimensions above to see estimated shipping rates.
+                </p>
+              )}
+            </div>
+
+            <div>
+              <FormLabel optional>Shipping insurance</FormLabel>
+              <label className="flex items-center gap-3 bg-zinc-950 border border-zinc-700 p-4 rounded-lg cursor-pointer">
+                <input type="checkbox" checked={newItem.insurance} onChange={(e) => setNewItem({ ...newItem, insurance: e.target.checked })} className="w-4 h-4" />
+                <span className="text-sm text-zinc-300">Add insurance (recommended for items over $100)</span>
+              </label>
+            </div>
+
+            <div>
+              <FormLabel htmlFor="post-image" optional>Image URL</FormLabel>
+              <input
+                id="post-image"
+                type="url"
+                placeholder="https://…"
+                value={newItem.image}
+                onChange={(e) => setNewItem({ ...newItem, image: e.target.value })}
+                className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-zinc-500"
+              />
+            </div>
+
+            <div>
+              <FormLabel htmlFor="post-description" optional>Description</FormLabel>
+              <textarea
+                id="post-description"
+                placeholder="Condition, included accessories, etc."
+                value={newItem.description}
+                onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+                className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg h-24 focus:outline-none focus:border-zinc-500"
+              />
+            </div>
+
+            {!canPostPreview && postPreviewHint && (
+              <p className="text-sm text-amber-400/90 bg-amber-950/20 border border-amber-900/40 rounded-lg px-4 py-3" role="status">
+                {postPreviewHint}
+              </p>
             )}
-            <label className="flex items-center gap-3 bg-zinc-950 border border-zinc-700 p-4 rounded-lg cursor-pointer">
-              <input type="checkbox" checked={newItem.insurance} onChange={(e) => setNewItem({...newItem, insurance: e.target.checked})} className="w-4 h-4" />
-              <span className="text-sm">Add shipping insurance (recommended over $100)</span>
-            </label>
-            <input type="text" placeholder="Image URL (optional)" value={newItem.image} onChange={(e) => setNewItem({...newItem, image: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
-            <textarea placeholder="Description" value={newItem.description} onChange={(e) => setNewItem({...newItem, description: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg h-24" />
-            <button type="submit" disabled={!newItem.selectedShipping} className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200 disabled:opacity-50">
+
+            <button
+              type="submit"
+              disabled={!canPostPreview}
+              className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Post Item (Preview)
             </button>
           </form>
