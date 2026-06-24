@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 
 interface Listing {
@@ -15,10 +16,10 @@ interface Listing {
   dimensions: string;
   insurance: boolean;
   insuranceCost: number;
+  isDemo?: boolean;
 }
 
-export default function CloserNet() {
-  const [listings, setListings] = useState<Listing[]>([
+const DEMO_LISTINGS: Listing[] = [
     {
       id: 1,
       title: "Sony WH-1000XM5 Headphones",
@@ -31,7 +32,8 @@ export default function CloserNet() {
       weight: 2,
       dimensions: "10 × 8 × 4",
       insurance: true,
-      insuranceCost: 4
+      insuranceCost: 4,
+      isDemo: true
     },
     {
       id: 2,
@@ -45,7 +47,8 @@ export default function CloserNet() {
       weight: 1.2,
       dimensions: "12 × 12 × 1",
       insurance: false,
-      insuranceCost: 0
+      insuranceCost: 0,
+      isDemo: true
     },
     {
       id: 3,
@@ -59,9 +62,13 @@ export default function CloserNet() {
       weight: 7,
       dimensions: "14 × 10 × 3",
       insurance: true,
-      insuranceCost: 37
+      insuranceCost: 37,
+      isDemo: true
     }
-  ]);
+];
+
+export default function CloserNet() {
+  const [userListings, setUserListings] = useState<Listing[]>([]);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -107,7 +114,9 @@ export default function CloserNet() {
     setNewItem({ ...newItem, selectedShipping: method });
   };
 
-  const filteredListings = listings.filter(listing => {
+  const allListings = [...userListings, ...DEMO_LISTINGS];
+
+  const filteredListings = allListings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) || listing.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "All" || listing.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -131,11 +140,15 @@ export default function CloserNet() {
 
     const low = Math.round(basePrice * 0.82);
     const high = Math.round(basePrice * 1.18);
-    setAiResult({ low, high, message: `Based on recent sales in ${category.toLowerCase()}, we recommend $${low} – $${high}.` });
+    setAiResult({
+      low,
+      high,
+      message: `Prototype estimate only — uses sample category averages, not live market data. Illustrative range for ${category.toLowerCase()}: $${low} – $${high}.`
+    });
   };
 
-  const generateGrokPrompt = () => {
-    const prompt = `I'm selling a "${aiInput.title}" in the ${aiInput.category} category. Can you give me a realistic selling price range based on current market value?`;
+  const generateResearchPrompt = () => {
+    const prompt = `I'm researching a fair price for a "${aiInput.title}" (${aiInput.category}). What price range would you expect for a used item in good condition based on current market comps?`;
     setGrokPrompt(prompt);
     setShowGrokPrompt(true);
   };
@@ -169,7 +182,7 @@ export default function CloserNet() {
       insuranceCost
     };
 
-    setListings([listing, ...listings]);
+    setUserListings([listing, ...userListings]);
     setNewItem({ title: "", price: "", description: "", category: "Audio", image: "", weight: "", length: "", width: "", height: "", insurance: false, selectedShipping: "" });
     setShippingRates([]);
     setShowForm(false);
@@ -189,6 +202,7 @@ export default function CloserNet() {
           <div className="flex items-center gap-6 text-sm">
             <a href="#how" className="hover:text-zinc-400">How it Works</a>
             <a href="#value" className="hover:text-zinc-400">CloserValue AI</a>
+            <a href="#fees" className="hover:text-zinc-400">Fees</a>
             <a href="#compare" className="hover:text-zinc-400">Compare</a>
             <a href="#faq" className="hover:text-zinc-400">FAQ</a>
             <button onClick={() => setShowForm(!showForm)} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
@@ -201,7 +215,7 @@ export default function CloserNet() {
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
         <div className="inline-block px-4 py-1 bg-zinc-900 rounded-full text-sm mb-6 border border-zinc-800">
-          Now with AI-powered pricing
+          Preview build — marketplace launching soon
         </div>
         <h1 className="text-6xl md:text-7xl font-semibold tracking-tighter mb-6">
           Closer to real value.<br />Protected by escrow.
@@ -222,12 +236,17 @@ export default function CloserNet() {
 
       {/* How it Works */}
       <section id="how" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-12">How CloserNet Works</h2>
-        <div className="grid md:grid-cols-3 gap-6">
+        <h2 className="text-4xl font-semibold text-center mb-4">How CloserNet Works</h2>
+        <p className="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
+          Create a free seller account, post your item, and let escrow handle payment security.
+          In this preview, posting saves a listing on this page only — full accounts and checkout are coming soon.
+        </p>
+        <div className="grid md:grid-cols-4 gap-6">
           {[
-            { num: "01", title: "List Your Item", desc: "Add weight & dimensions. We calculate real shipping rates from USPS, UPS & FedEx." },
-            { num: "02", title: "Secure Escrow", desc: "Buyer pays into escrow. You ship using your chosen method." },
-            { num: "03", title: "Get Paid Reliably", desc: "Funds are released after buyer confirmation. Keep ~95% of your sale." }
+            { num: "01", title: "Create Account", desc: "Sign up free with email. Verify identity before your first sale goes live." },
+            { num: "02", title: "List Your Item", desc: "Add photos, price, weight & dimensions. We estimate USPS, UPS & FedEx rates." },
+            { num: "03", title: "Secure Escrow", desc: "Buyer pays into escrow at checkout. You ship only after payment is secured." },
+            { num: "04", title: "Get Paid", desc: "Funds release after delivery confirmation. You keep ~95% after our ~5% total fee." }
           ].map((step, i) => (
             <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
               <div className="text-5xl font-bold text-zinc-700 mb-6">{step.num}</div>
@@ -238,12 +257,65 @@ export default function CloserNet() {
         </div>
       </section>
 
+      {/* Fee Breakdown */}
+      <section id="fees" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
+        <h2 className="text-4xl font-semibold text-center mb-4">Transparent Fee Breakdown</h2>
+        <p className="text-center text-zinc-400 mb-10">No hidden charges. Here is exactly what a seller pays on a completed sale.</p>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden mb-8">
+          <table className="w-full text-sm">
+            <thead className="bg-zinc-950 border-b border-zinc-800">
+              <tr>
+                <th className="text-left p-4 font-medium">Fee type</th>
+                <th className="text-right p-4 font-medium">Rate</th>
+                <th className="text-left p-4 font-medium hidden md:table-cell">What it covers</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800">
+              {[
+                ["CloserNet platform fee", "3.0%", "Marketplace, escrow, listing tools"],
+                ["Payment processing", "2.0%", "Card/bank processing (passed through at cost)"],
+                ["Total seller fee", "~5.0%", "Combined — you keep ~95% of the sale price"],
+              ].map(([fee, rate, covers], i) => (
+                <tr key={i} className={i === 2 ? "bg-zinc-950" : ""}>
+                  <td className={`p-4 ${i === 2 ? "font-semibold text-white" : ""}`}>{fee}</td>
+                  <td className={`p-4 text-right ${i === 2 ? "font-semibold text-green-400" : "text-green-400"}`}>{rate}</td>
+                  <td className="p-4 text-zinc-400 hidden md:table-cell">{covers}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-4 text-center">
+          {[
+            { price: 50, fee: 2.50, payout: 47.50 },
+            { price: 200, fee: 10, payout: 190 },
+            { price: 1000, fee: 50, payout: 950 },
+          ].map((ex) => (
+            <div key={ex.price} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+              <div className="text-zinc-400 text-sm mb-1">${ex.price} sale</div>
+              <div className="text-2xl font-semibold text-green-400">${ex.payout.toFixed(2)}</div>
+              <div className="text-xs text-zinc-500 mt-1">after ${ex.fee.toFixed(2)} total fees</div>
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-xs text-zinc-500 mt-6">
+          Shipping and optional insurance are paid by the buyer at checkout and are not deducted from your sale price.
+        </p>
+      </section>
+
       {/* CloserValue AI */}
       <section id="value" className="max-w-4xl mx-auto px-6 py-14 border-t border-zinc-800 bg-zinc-900">
         <div className="text-center mb-8">
-          <div className="inline-block px-4 py-1 bg-zinc-800 rounded-full text-sm mb-4">DEMO + REAL AI</div>
+          <div className="inline-block px-4 py-1 bg-amber-900/40 border border-amber-700/50 text-amber-200 rounded-full text-sm mb-4">
+            Prototype — not connected to live pricing data
+          </div>
           <h2 className="text-4xl font-semibold mb-3">CloserValue AI</h2>
-          <p className="text-zinc-400">Get a smart price suggestion. For the most accurate price, ask Grok directly.</p>
+          <p className="text-zinc-400 max-w-lg mx-auto">
+            A preview pricing helper that uses sample category averages to suggest a ballpark range.
+            It does not pull real-time comps — use it as a starting point, not a final price.
+          </p>
         </div>
 
         <div className="max-w-md mx-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
@@ -252,16 +324,18 @@ export default function CloserNet() {
             <select value={aiInput.category} onChange={(e) => setAiInput({...aiInput, category: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg">
               {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
-            <button onClick={getCloserValue} className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200">Get Demo Estimate</button>
+            <button onClick={getCloserValue} className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200">
+              Get Prototype Estimate
+            </button>
           </div>
 
           {aiResult && (
             <div className="mt-6 p-5 bg-zinc-900 border border-zinc-800 rounded-xl">
-              <div className="text-sm text-zinc-400 mb-1">Demo Estimate</div>
+              <div className="text-xs uppercase tracking-wide text-amber-400 mb-1">Prototype estimate only</div>
               <div className="text-3xl font-semibold mb-2">${aiResult.low} – ${aiResult.high}</div>
               <p className="text-sm text-zinc-400 mb-4">{aiResult.message}</p>
-              <button onClick={generateGrokPrompt} className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800">
-                Get Real Price Suggestion from Grok
+              <button onClick={generateResearchPrompt} className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800">
+                Copy research prompt (optional)
               </button>
             </div>
           )}
@@ -341,11 +415,11 @@ export default function CloserNet() {
         <h2 className="text-4xl font-semibold text-center mb-12">Frequently Asked Questions</h2>
         <div className="space-y-6">
           {[
-            ["How much does it cost to sell?", "Only about 5% total fees — significantly lower than most marketplaces. You keep roughly 95% of every sale."],
+            ["How much does it cost to sell?", "About 5% total: 3% CloserNet platform fee + ~2% payment processing. See the fee breakdown above for examples."],
+            ["How do I post an item?", "Click Post Item, fill in details and shipping info, and submit. In this preview your listing appears on this page. Full accounts with live checkout are coming soon."],
             ["How does escrow work?", "The buyer pays into escrow when they purchase. You ship the item. Funds are released once the buyer confirms delivery."],
             ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
-            ["Should I add insurance?", "We recommend insurance for items over $100. It costs about 1.5% of the item value and protects against loss or damage in transit."],
-            ["How does CloserValue AI work?", "Enter your item title and category for a demo price range. For a more accurate estimate, use the Grok prompt for a real market suggestion."],
+            ["What is CloserValue AI?", "A prototype tool using sample category averages — not live market data. Use it for a ballpark range and verify with your own research before listing."],
           ].map(([question, answer], i) => (
             <div key={i} className="border border-zinc-800 rounded-2xl p-6">
               <h4 className="font-semibold text-lg mb-2">{question}</h4>
@@ -364,15 +438,33 @@ export default function CloserNet() {
           </select>
         </div>
 
-        <h2 className="text-3xl font-semibold mb-8">Featured Listings</h2>
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-3xl font-semibold">Browse Listings</h2>
+            <p className="text-zinc-400 text-sm mt-2">
+              Sample listings below are marked <span className="text-amber-400">Sample</span> for demonstration.
+              Your posted items appear without that label.
+            </p>
+          </div>
+          {userListings.length > 0 && (
+            <span className="text-sm text-zinc-400">{userListings.length} listing{userListings.length !== 1 ? "s" : ""} posted by you</span>
+          )}
+        </div>
 
         {filteredListings.length === 0 ? (
           <p className="text-center text-zinc-400 py-10">No listings found.</p>
         ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredListings.map((listing) => (
-            <div key={listing.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
-              <img src={listing.image} alt={listing.title} className="w-full h-48 object-cover" />
+            <div key={listing.id} className={`bg-zinc-900 border rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors ${listing.isDemo ? "border-amber-900/50" : "border-zinc-800"}`}>
+              <div className="relative">
+                <img src={listing.image} alt={listing.title} className="w-full h-48 object-cover" />
+                {listing.isDemo && (
+                  <span className="absolute top-3 left-3 text-xs px-2.5 py-1 bg-amber-900/90 border border-amber-700 text-amber-100 rounded-full">
+                    Sample listing
+                  </span>
+                )}
+              </div>
               <div className="p-6">
                 <div className="flex justify-between items-start mb-3">
                   <span className="text-xs px-3 py-1 bg-zinc-800 rounded-full">{listing.category}</span>
@@ -398,8 +490,11 @@ export default function CloserNet() {
                   )}
                 </div>
 
-                <button className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800 transition-colors">
-                  View Details & Buy
+                <button
+                  disabled={listing.isDemo}
+                  className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {listing.isDemo ? "Sample — not for sale" : "View Details & Buy"}
                 </button>
               </div>
             </div>
@@ -411,7 +506,16 @@ export default function CloserNet() {
       {/* Post Form */}
       {showForm && (
         <section className="max-w-xl mx-auto px-6 py-10 border-t border-zinc-800">
-          <h3 className="text-2xl font-semibold mb-6">Post a New Item</h3>
+          <h3 className="text-2xl font-semibold mb-2">Post a New Item</h3>
+          <p className="text-zinc-400 text-sm mb-6">
+            <strong className="text-zinc-300">Preview flow:</strong> No account required yet. Submitting adds your listing
+            to this page for demo purposes. Full seller accounts, buyer checkout, and escrow payments launch soon.
+          </p>
+          <ol className="text-sm text-zinc-400 mb-6 space-y-1 list-decimal list-inside">
+            <li>Enter item details and set your asking price</li>
+            <li>Add weight & dimensions to get shipping rate estimates</li>
+            <li>Select a carrier and optional insurance, then post</li>
+          </ol>
           <form onSubmit={handleSubmit} className="space-y-4">
             <input type="text" placeholder="Item Title" value={newItem.title} onChange={(e) => setNewItem({...newItem, title: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" required />
             <input type="number" placeholder="Price ($)" value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" required />
@@ -460,14 +564,20 @@ export default function CloserNet() {
       )}
 
       <footer className="border-t border-zinc-800 py-10 text-center text-sm text-zinc-500">
-        CloserNet • Lower Fees • Escrow Protected • Smart Shipping
+        <p className="mb-3">CloserNet • Lower Fees • Escrow Protected • Smart Shipping</p>
+        <div className="flex justify-center gap-6">
+          <Link href="/terms" className="hover:text-zinc-300">Terms of Service</Link>
+          <Link href="/privacy" className="hover:text-zinc-300">Privacy Policy</Link>
+          <a href="mailto:support@closernet.net" className="hover:text-zinc-300">Contact</a>
+        </div>
       </footer>
 
       {/* Grok Prompt Modal */}
       {showGrokPrompt && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 max-w-lg mx-4">
-            <h3 className="text-xl font-semibold mb-4">Ask Grok for a Real Price</h3>
+            <h3 className="text-xl font-semibold mb-4">Research prompt (optional)</h3>
+            <p className="text-zinc-400 text-sm mb-4">Copy this prompt to research comparable prices elsewhere.</p>
             <div className="bg-zinc-950 p-4 rounded-lg text-sm mb-6 border border-zinc-800">{grokPrompt}</div>
             <div className="flex gap-3">
               <button onClick={() => { navigator.clipboard.writeText(grokPrompt); alert("Copied! Now paste it in our chat."); }} className="flex-1 py-3 bg-white text-black rounded-full font-medium">Copy Message</button>
