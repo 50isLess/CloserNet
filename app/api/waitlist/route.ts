@@ -24,7 +24,10 @@ export async function POST(request: Request) {
 
     if (duplicate) {
       return NextResponse.json(
-        { message: "You're already on the waitlist. We'll be in touch soon." },
+        {
+          message: "Good news — you're already on the waitlist. We'll email you when early access opens.",
+          duplicate: true,
+        },
         { status: 200 }
       );
     }
@@ -64,8 +67,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       message: apiKey
-        ? "You're on the list! Check your inbox for a confirmation email."
-        : "You're on the list! We'll email you when early access opens.",
+        ? "Check your inbox — we just sent a confirmation email."
+        : "You're in! We'll email you when seller accounts and checkout go live.",
+      emailSent: Boolean(apiKey),
     });
   } catch (error) {
     console.error("Waitlist signup failed:", error);

@@ -66,6 +66,21 @@ const DEMO_LISTINGS: Listing[] = [
     insurance: true,
     insuranceCost: 37,
     isDemo: true
+  },
+  {
+    id: 4,
+    title: "Audio-Technica AT-LP120XUSB Turntable",
+    price: 275,
+    description: "Direct-drive turntable in excellent condition. USB output, new stylus, original box.",
+    category: "Audio",
+    image: "/listings/audio-technica-turntable.jpg",
+    shippingCost: 18,
+    shippingMethod: "UPS Ground",
+    weight: 14,
+    dimensions: "18 × 15 × 7",
+    insurance: true,
+    insuranceCost: 5,
+    isDemo: true
   }
 ];
 
@@ -122,7 +137,7 @@ export default function CloserNet() {
       }
 
       setWaitlistStatus("success");
-      setWaitlistMessage(data.message);
+      setWaitlistMessage(data.message ?? "You're on the waitlist!");
       setWaitlistEmail("");
     } catch {
       setWaitlistStatus("error");
@@ -248,35 +263,63 @@ export default function CloserNet() {
           That&apos;s roughly half what eBay keeps — with real payment protection built in.
         </p>
 
-        <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto mb-6">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <input
-              id="waitlist-email"
-              type="email"
-              required
-              placeholder="Enter your email"
-              value={waitlistEmail}
-              onChange={(e) => setWaitlistEmail(e.target.value)}
-              disabled={waitlistStatus === "loading"}
-              className="flex-1 bg-zinc-900 border border-zinc-700 px-5 py-3.5 rounded-full text-base placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 disabled:opacity-50"
-            />
+        {waitlistStatus === "success" ? (
+          <div
+            role="status"
+            aria-live="polite"
+            className="max-w-md mx-auto mb-6 p-6 bg-emerald-950/40 border border-emerald-800/50 rounded-2xl text-left"
+          >
+            <div className="flex items-start gap-3">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-300 text-lg">
+                ✓
+              </span>
+              <div>
+                <p className="font-medium text-emerald-100 mb-1">You&apos;re on the waitlist</p>
+                <p className="text-sm text-emerald-200/90 leading-relaxed">{waitlistMessage}</p>
+                <p className="text-xs text-emerald-300/70 mt-3">
+                  We&apos;ll only email you about launch updates — no spam.
+                </p>
+              </div>
+            </div>
             <button
-              type="submit"
-              disabled={waitlistStatus === "loading"}
-              className="px-8 py-3.5 bg-white text-black rounded-full text-lg font-medium hover:bg-zinc-200 disabled:opacity-50 whitespace-nowrap"
+              type="button"
+              onClick={() => { setWaitlistStatus("idle"); setWaitlistMessage(""); }}
+              className="mt-4 text-sm text-emerald-300/80 hover:text-emerald-200 underline underline-offset-2"
             >
-              {waitlistStatus === "loading" ? "Joining…" : "Get Early Access"}
+              Join with another email
             </button>
           </div>
-          {waitlistMessage && (
-            <p className={`mt-4 text-sm ${waitlistStatus === "error" ? "text-red-400" : "text-green-400"}`}>
-              {waitlistMessage}
+        ) : (
+          <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto mb-6">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                id="waitlist-email"
+                type="email"
+                required
+                placeholder="Enter your email"
+                value={waitlistEmail}
+                onChange={(e) => setWaitlistEmail(e.target.value)}
+                disabled={waitlistStatus === "loading"}
+                className="flex-1 bg-zinc-900 border border-zinc-700 px-5 py-3.5 rounded-full text-base placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500 disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={waitlistStatus === "loading"}
+                className="px-8 py-3.5 bg-white text-black rounded-full text-lg font-medium hover:bg-zinc-200 disabled:opacity-50 whitespace-nowrap"
+              >
+                {waitlistStatus === "loading" ? "Joining…" : "Get Early Access"}
+              </button>
+            </div>
+            {waitlistStatus === "error" && waitlistMessage && (
+              <p role="alert" className="mt-4 text-sm text-red-400 bg-red-950/30 border border-red-900/50 rounded-lg p-3">
+                {waitlistMessage}
+              </p>
+            )}
+            <p className="mt-3 text-xs text-zinc-500">
+              Be first to sell when checkout launches. No spam — just launch updates.
             </p>
-          )}
-          <p className="mt-3 text-xs text-zinc-500">
-            Be first to sell when checkout launches. No spam — just launch updates.
-          </p>
-        </form>
+          </form>
+        )}
 
         <button onClick={() => document.getElementById('value')?.scrollIntoView({ behavior: 'smooth' })} className="px-6 sm:px-8 py-3 sm:py-3.5 border border-zinc-700 rounded-full text-base sm:text-lg hover:bg-zinc-900">
           Try CloserValue AI
@@ -463,7 +506,7 @@ export default function CloserNet() {
               disabled={aiStatus === "loading" || !aiInput.title.trim()}
               className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200 disabled:opacity-50 transition-colors"
             >
-              {aiStatus === "loading" ? "Grok is analyzing…" : "Get Demo Estimate"}
+              {aiStatus === "loading" ? "Grok is analyzing…" : "Get Estimate"}
             </button>
           </div>
 
@@ -488,15 +531,20 @@ export default function CloserNet() {
               <div className="text-3xl font-semibold mb-2 text-white">${aiResult.low} – ${aiResult.high}</div>
               <p className="text-sm text-zinc-300 mb-4 leading-relaxed">{aiResult.reason}</p>
               <div className="flex flex-col sm:flex-row gap-2">
-                <button
-                  onClick={generateResearchPrompt}
-                  className="flex-1 py-2.5 border border-zinc-600 rounded-full text-sm hover:bg-zinc-800 transition-colors"
-                >
-                  Ask Grok
-                </button>
+                <div className="flex-1">
+                  <button
+                    onClick={generateResearchPrompt}
+                    className="w-full py-2.5 border border-zinc-600 rounded-full text-sm hover:bg-zinc-800 transition-colors"
+                  >
+                    Ask Grok
+                  </button>
+                  <p className="text-xs text-zinc-500 text-center mt-1.5">
+                    Copy a research prompt for Grok chat
+                  </p>
+                </div>
                 <button
                   onClick={() => { setShowForm(true); document.getElementById("post")?.scrollIntoView({ behavior: "smooth" }); }}
-                  className="flex-1 py-2.5 bg-zinc-800 border border-zinc-600 rounded-full text-sm hover:bg-zinc-700 transition-colors"
+                  className="flex-1 py-2.5 bg-zinc-800 border border-zinc-600 rounded-full text-sm hover:bg-zinc-700 transition-colors self-start"
                 >
                   Preview Listing
                 </button>
@@ -661,7 +709,7 @@ export default function CloserNet() {
         {filteredListings.length === 0 ? (
           <p className="text-center text-zinc-400 py-10">No listings found.</p>
         ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6">
           {filteredListings.map((listing) => (
             <div key={listing.id} className={`bg-zinc-900 border rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors ${listing.isDemo ? "border-amber-900/50" : "border-zinc-700 ring-1 ring-white/5"}`}>
               <div className="relative">
@@ -788,11 +836,30 @@ export default function CloserNet() {
       {showGrokPrompt && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5 sm:p-8 max-w-lg w-full shadow-2xl">
-            <h3 className="text-xl font-semibold mb-2">Ask Grok</h3>
-            <p className="text-zinc-400 text-sm mb-4">Copy this prompt into Grok for deeper market research.</p>
+            <h3 className="text-xl font-semibold mb-2">Research prompt for Grok</h3>
+            <p className="text-zinc-400 text-sm mb-4">
+              Copy this prompt, then paste it into{" "}
+              <a
+                href="https://grok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-400 hover:text-emerald-300 underline underline-offset-2"
+              >
+                Grok chat
+              </a>{" "}
+              for deeper pricing research.
+            </p>
             <div className="bg-zinc-950 p-4 rounded-lg text-sm mb-6 border border-zinc-800 max-h-48 overflow-y-auto">{grokPrompt}</div>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <button onClick={() => { navigator.clipboard.writeText(grokPrompt); }} className="flex-1 py-3 bg-white text-black rounded-full font-medium hover:bg-zinc-200">Copy Prompt</button>
+              <a
+                href="https://grok.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-3 border border-zinc-700 rounded-full hover:bg-zinc-800 text-center"
+              >
+                Open Grok
+              </a>
               <button onClick={() => setShowGrokPrompt(false)} className="flex-1 py-3 border border-zinc-700 rounded-full hover:bg-zinc-800">Close</button>
             </div>
           </div>

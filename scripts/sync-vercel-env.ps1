@@ -10,7 +10,7 @@ if (-not (Test-Path $envFile)) {
   Write-Error ".env.local not found. Copy .env.example and add your keys first."
 }
 
-$vars = @("XAI_API_KEY", "XAI_MODEL", "RESEND_API_KEY", "RESEND_FROM_EMAIL", "WAITLIST_NOTIFY_EMAIL")
+$vars = @("NEXT_PUBLIC_SITE_URL", "XAI_API_KEY", "XAI_MODEL", "RESEND_API_KEY", "RESEND_FROM_EMAIL", "WAITLIST_NOTIFY_EMAIL")
 $lines = Get-Content $envFile
 
 foreach ($name in $vars) {

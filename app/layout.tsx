@@ -12,13 +12,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://closernet.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://closernet.net";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "CloserNet — Peer-to-Peer Marketplace with Escrow & Low Fees",
   description:
     "Sell used goods on CloserNet with ~7.5% total fees including Stripe escrow — roughly half what eBay keeps. Smart shipping estimates for collectibles, electronics, and more.",
+  alternates: {
+    canonical: siteUrl,
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
