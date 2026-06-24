@@ -16,7 +16,7 @@ Write-Host "=============================="
 Write-Host ""
 Write-Host "1. Open https://resend.com/api-keys and create an API key"
 Write-Host "2. For production, verify closernet.net at https://resend.com/domains"
-Write-Host "   Then set RESEND_FROM_EMAIL to e.g. CloserNet <hello@closernet.net>"
+Write-Host "   Then set RESEND_FROM_EMAIL to CloserNet <support@closernet.net>"
 Write-Host ""
 Write-Host "Quick test mode uses onboarding@resend.dev (only delivers to your Resend account email)."
 Write-Host ""
@@ -31,9 +31,9 @@ if (-not $apiKey.Trim().StartsWith("re_")) {
   Write-Warning "Resend keys usually start with re_ — double-check you copied the full key."
 }
 
-$from = Read-Host "From address [CloserNet <onboarding@resend.dev>]"
+$from = Read-Host "From address [CloserNet <support@closernet.net>]"
 if (-not $from.Trim()) {
-  $from = "CloserNet <onboarding@resend.dev>"
+  $from = "CloserNet <support@closernet.net>"
 }
 
 $notify = Read-Host "Notify email for new signups [support@closernet.net]"

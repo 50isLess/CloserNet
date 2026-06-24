@@ -6,7 +6,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function GET() {
   const apiKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.RESEND_FROM_EMAIL?.trim() ?? "CloserNet <onboarding@resend.dev>";
+  const from = process.env.RESEND_FROM_EMAIL?.trim() ?? "CloserNet <support@closernet.net>";
   const notify = process.env.WAITLIST_NOTIFY_EMAIL?.trim() ?? "support@closernet.net";
   const usingTestSender = from.includes("resend.dev");
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     const apiKey = process.env.RESEND_API_KEY;
     if (apiKey) {
       const resend = new Resend(apiKey);
-      const from = process.env.RESEND_FROM_EMAIL ?? "CloserNet <onboarding@resend.dev>";
+      const from = process.env.RESEND_FROM_EMAIL ?? "CloserNet <support@closernet.net>";
 
       await resend.emails.send({
         from,
