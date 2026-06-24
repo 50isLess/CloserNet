@@ -182,7 +182,8 @@ export default function TermsPage() {
           <div>
             <h2 className="text-xl font-semibold text-white mb-2">13. CloserValue AI & estimates</h2>
             <p>
-              CloserValue AI and shipping calculators are informational tools only. They use sample data or formulas and
+              CloserValue AI and shipping calculators are informational tools only. CloserValue AI uses third-party AI
+              models (e.g., Grok via xAI) and may incorporate market knowledge that is not verified in real time. They
               do not constitute appraisals, investment advice, or guarantees of sale price, shipping cost, or market demand.
               You are solely responsible for your listing price and shipping choices.
             </p>

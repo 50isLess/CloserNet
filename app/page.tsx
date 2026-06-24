@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { Navbar } from '@/components/Navbar';
+import type { CloserValueResult } from '@/lib/closervalue';
 
 interface Listing {
   id: number;
@@ -71,10 +72,10 @@ const DEMO_LISTINGS: Listing[] = [
 export default function CloserNet() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [aiResult, setAiResult] = useState<any>(null);
+  const [aiResult, setAiResult] = useState<CloserValueResult | null>(null);
   const [aiInput, setAiInput] = useState({ title: "", category: "Audio" });
-  const [showGrokPrompt, setShowGrokPrompt] = useState(false);
-  const [grokPrompt, setGrokPrompt] = useState("");
+  const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "error">("idle");
+  const [aiError, setAiError] = useState("");
 
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -125,34 +126,34 @@ export default function CloserNet() {
     return matchesSearch && matchesCategory;
   });
 
-  const getCloserValue = () => {
+  const getCloserValue = async () => {
     const { title, category } = aiInput;
-    let basePrice = 70;
-    const basePrices: { [key: string]: number } = {
-      Audio: 200, Electronics: 900, Photography: 650, Collectibles: 380,
-      Clothes: 50, Books: 25, Vinyl: 40, DVD: 14, CDs: 16, Other: 55
-    };
-    basePrice = basePrices[category] || 70;
+    if (!title.trim()) return;
 
-    const lower = title.toLowerCase();
-    if (lower.includes("leica")) basePrice *= 2.3;
-    if (lower.includes("macbook")) basePrice *= 1.75;
-    if (lower.includes("headphones")) basePrice *= 1.3;
-    if (lower.includes("vinyl")) basePrice *= 1.35;
+    setAiStatus("loading");
+    setAiError("");
+    setAiResult(null);
 
-    const low = Math.round(basePrice * 0.82);
-    const high = Math.round(basePrice * 1.18);
-    setAiResult({
-      low,
-      high,
-      message: `Suggested range for ${category.toLowerCase()}: $${low} – $${high}.`
-    });
-  };
+    try {
+      const res = await fetch("/api/closervalue", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, category }),
+      });
+      const data = await res.json();
 
-  const generateResearchPrompt = () => {
-    const prompt = `I'm researching a fair price for a "${aiInput.title}" (${aiInput.category}). What price range would you expect for a used item in good condition based on current market comps?`;
-    setGrokPrompt(prompt);
-    setShowGrokPrompt(true);
+      if (!res.ok) {
+        setAiStatus("error");
+        setAiError(data.error ?? "Something went wrong. Please try again.");
+        return;
+      }
+
+      setAiResult(data as CloserValueResult);
+      setAiStatus("idle");
+    } catch {
+      setAiStatus("error");
+      setAiError("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -353,30 +354,52 @@ export default function CloserNet() {
         <div className="text-center mb-8">
           <h2 className="text-3xl sm:text-4xl font-semibold mb-3">CloserValue AI</h2>
           <p className="text-zinc-300 max-w-lg mx-auto">
-            Enter your item title and category — we match it against sample averages to suggest a fair price range before you list.
+            Enter your item title and category — Grok analyzes market comps to suggest a fair price range before you list.
           </p>
         </div>
 
         <div className="max-w-md mx-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-5 sm:p-8">
           <div className="space-y-4">
-            <input type="text" placeholder="Item title" value={aiInput.title} onChange={(e) => setAiInput({...aiInput, title: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
-            <select value={aiInput.category} onChange={(e) => setAiInput({...aiInput, category: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg">
+            <input
+              type="text"
+              placeholder="Item title"
+              value={aiInput.title}
+              onChange={(e) => setAiInput({ ...aiInput, title: e.target.value })}
+              disabled={aiStatus === "loading"}
+              className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg disabled:opacity-50"
+            />
+            <select
+              value={aiInput.category}
+              onChange={(e) => setAiInput({ ...aiInput, category: e.target.value })}
+              disabled={aiStatus === "loading"}
+              className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg disabled:opacity-50"
+            >
               {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
-            <button onClick={getCloserValue} className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200">
-              Get Estimate
+            <button
+              onClick={getCloserValue}
+              disabled={aiStatus === "loading" || !aiInput.title.trim()}
+              className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200 disabled:opacity-50"
+            >
+              {aiStatus === "loading" ? "Analyzing…" : "Get Estimate"}
             </button>
           </div>
 
+          {aiError && (
+            <p className="mt-4 text-sm text-red-400">{aiError}</p>
+          )}
+
           {aiResult && (
             <div className="mt-6 p-5 bg-zinc-900 border border-zinc-800 rounded-xl">
+              {aiResult.confidence && (
+                <div className="text-xs uppercase tracking-wide text-zinc-500 mb-2">
+                  Confidence: {aiResult.confidence}
+                </div>
+              )}
               <div className="text-3xl font-semibold mb-2">${aiResult.low} – ${aiResult.high}</div>
               <p className="text-sm text-zinc-400 mb-4">{aiResult.message}</p>
-              <button onClick={generateResearchPrompt} className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800 mb-4">
-                Copy research prompt (optional)
-              </button>
               <p className="text-xs text-zinc-500 leading-relaxed">
-                * Uses sample category averages, not live market data. Verify with your own research before listing.
+                * AI estimate powered by Grok. Based on market knowledge and available data — not a guarantee. Verify before listing.
               </p>
             </div>
           )}
@@ -485,7 +508,7 @@ export default function CloserNet() {
             ["How does escrow work?", "Buyer pays at checkout and funds are held by Stripe, our escrow agent — not the seller. CloserNet facilitates the transaction; Stripe secures and releases payment after the buyer confirms delivery. See the How Escrow Works section above for the full flow."],
             ["What happens if the buyer claims the item wasn't as described?", "Either party can open a dispute before funds are released. We may ask for photos, tracking, and messages from both sides, then decide on a full refund, partial refund, or release to the seller based on the evidence. Chargebacks opened outside this process may result in account suspension."],
             ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
-            ["What is CloserValue AI?", "A pricing helper that uses sample category averages to suggest a ballpark range. Use it as a starting point and verify with your own research before listing."],
+            ["What is CloserValue AI?", "An AI pricing helper powered by Grok that estimates a fair resale range based on your item title, category, and market comps. Use it as a starting point and verify with your own research before listing."],
           ].map(([question, answer], i) => (
             <div key={i} className="border border-zinc-800 rounded-2xl p-5 sm:p-6">
               <h4 className="font-semibold text-lg mb-2">{question}</h4>
@@ -575,20 +598,6 @@ export default function CloserNet() {
         </div>
       </footer>
 
-      {/* Grok Prompt Modal */}
-      {showGrokPrompt && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5 sm:p-8 max-w-lg mx-4 w-[calc(100%-2rem)]">
-            <h3 className="text-xl font-semibold mb-4">Research prompt (optional)</h3>
-            <p className="text-zinc-400 text-sm mb-4">Copy this prompt to research comparable prices elsewhere.</p>
-            <div className="bg-zinc-950 p-4 rounded-lg text-sm mb-6 border border-zinc-800">{grokPrompt}</div>
-            <div className="flex gap-3">
-              <button onClick={() => { navigator.clipboard.writeText(grokPrompt); alert("Copied! Now paste it in our chat."); }} className="flex-1 py-3 bg-white text-black rounded-full font-medium">Copy Message</button>
-              <button onClick={() => setShowGrokPrompt(false)} className="flex-1 py-3 border border-zinc-700 rounded-full">Close</button>
-            </div>
-          </div>
-        </div>
-      )}
     </main>
   );
 }
