@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { FeeCalculator } from '@/components/FeeCalculator';
 import { ForumPartners } from '@/components/ForumPartners';
+import { ListingImage } from '@/components/ListingImage';
 import { Navbar } from '@/components/Navbar';
 import type { CloserValueResult } from '@/lib/closervalue';
 import { sanitizeReferral } from '@/lib/referral';
@@ -203,7 +204,7 @@ export default function CloserNet() {
       price: itemValue,
       description: newItem.description,
       category: newItem.category,
-      image: newItem.image || "/listings/sony-wh1000xm5.jpg",
+      image: newItem.image.trim(),
       shippingCost: selectedRate ? selectedRate.cost : 10,
       shippingMethod: newItem.selectedShipping,
       weight: w,
@@ -723,7 +724,7 @@ export default function CloserNet() {
           {filteredListings.map((listing) => (
             <div key={listing.id} className={`bg-zinc-900 border rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors ${listing.isDemo ? "border-amber-900/50" : "border-zinc-700 ring-1 ring-white/5"}`}>
               <div className="relative">
-                <img src={listing.image} alt={listing.title} className="w-full h-48 object-cover" />
+                <ListingImage src={listing.image} alt={listing.title} />
                 {listing.isDemo ? (
                   <span className="absolute top-3 left-3 text-xs px-2.5 py-1 bg-amber-900/90 border border-amber-700 text-amber-100 rounded-full">
                     Sample listing
