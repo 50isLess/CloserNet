@@ -27,7 +27,7 @@ export function Logo({ className = "" }: { className?: string }) {
           strokeLinecap="round"
         />
       </svg>
-      <span className="text-[1.35rem] font-semibold tracking-tight leading-none">
+      <span className="text-lg sm:text-[1.35rem] font-semibold tracking-tight leading-none truncate">
         Closer<span className="font-medium text-zinc-400 group-hover:text-zinc-300 transition-colors">Net</span>
       </span>
     </Link>

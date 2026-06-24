@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Logo } from '@/components/Logo';
+import { Navbar } from '@/components/Navbar';
 
 interface Listing {
   id: number;
@@ -156,31 +156,15 @@ export default function CloserNet() {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
-      {/* Navbar */}
-      <nav className="border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex justify-between items-center">
-          <Logo />
-          <div className="flex items-center gap-6 text-sm">
-            <a href="#how" className="hover:text-zinc-400">How it Works</a>
-            <a href="#escrow" className="hover:text-zinc-400">Escrow</a>
-            <a href="#value" className="hover:text-zinc-400">CloserValue AI</a>
-            <a href="#fees" className="hover:text-zinc-400">Fees</a>
-            <a href="#compare" className="hover:text-zinc-400">Compare</a>
-            <a href="#faq" className="hover:text-zinc-400">FAQ</a>
-            <button onClick={scrollToWaitlist} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
-              Join the Waitlist
-            </button>
-          </div>
-        </div>
-      </nav>
+    <main className="min-h-screen bg-zinc-950 text-white overflow-x-hidden">
+      <Navbar onJoinWaitlist={scrollToWaitlist} />
 
       {/* Hero */}
-      <section id="waitlist" className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
-        <h1 className="text-6xl md:text-7xl font-semibold tracking-tighter mb-6">
+      <section id="waitlist" className="max-w-5xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-12 sm:pb-16 text-center">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold tracking-tighter mb-6 text-balance">
           Closer to real value.<br />Protected by escrow.
         </h1>
-        <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
+        <p className="text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mx-auto mb-10 text-balance">
           A simpler peer-to-peer marketplace. Only ~7.5% total fees, including Stripe escrow.<br />
           That&apos;s roughly half what eBay keeps — with real payment protection built in.
         </p>
@@ -215,14 +199,14 @@ export default function CloserNet() {
           </p>
         </form>
 
-        <button onClick={() => document.getElementById('value')?.scrollIntoView({ behavior: 'smooth' })} className="px-8 py-3.5 border border-zinc-700 rounded-full text-lg hover:bg-zinc-900">
+        <button onClick={() => document.getElementById('value')?.scrollIntoView({ behavior: 'smooth' })} className="px-6 sm:px-8 py-3 sm:py-3.5 border border-zinc-700 rounded-full text-base sm:text-lg hover:bg-zinc-900">
           Try CloserValue AI
         </button>
       </section>
 
       {/* How it Works */}
-      <section id="how" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-4">How CloserNet Works</h2>
+      <section id="how" className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 border-t border-zinc-800">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-4">How CloserNet Works</h2>
         <p className="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
           Join the waitlist now. When we launch, create a free seller account, list your item,
           and let escrow handle payment security from day one.
@@ -234,9 +218,9 @@ export default function CloserNet() {
             { num: "03", title: "Secure Escrow", desc: "Buyer pays at checkout. Stripe holds funds in escrow until delivery is confirmed." },
             { num: "04", title: "Get Paid", desc: "Funds release after delivery confirmation. You keep ~92.5% after our ~7.5% total fee." }
           ].map((step, i) => (
-            <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-              <div className="text-5xl font-bold text-zinc-700 mb-6">{step.num}</div>
-              <h3 className="text-2xl font-semibold mb-3">{step.title}</h3>
+            <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 sm:p-8">
+              <div className="text-4xl sm:text-5xl font-bold text-zinc-700 mb-4 sm:mb-6">{step.num}</div>
+              <h3 className="text-xl sm:text-2xl font-semibold mb-3">{step.title}</h3>
               <p className="text-zinc-400">{step.desc}</p>
             </div>
           ))}
@@ -244,8 +228,8 @@ export default function CloserNet() {
       </section>
 
       {/* How Escrow Works */}
-      <section id="escrow" className="max-w-6xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-4">How Escrow Works</h2>
+      <section id="escrow" className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-16 border-t border-zinc-800">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-4">How Escrow Works</h2>
         <p className="text-center text-zinc-400 mb-4 max-w-2xl mx-auto">
           Neither side takes the risk alone. Stripe acts as our escrow agent — payment stays locked until the deal is done.
         </p>
@@ -314,15 +298,15 @@ export default function CloserNet() {
       </section>
 
       {/* Fee Breakdown */}
-      <section id="fees" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-4">Transparent Fee Breakdown</h2>
+      <section id="fees" className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 border-t border-zinc-800">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-4">Transparent Fee Breakdown</h2>
         <p className="text-center text-zinc-400 mb-4">No hidden charges. Here is exactly what a seller pays on a completed sale.</p>
         <p className="text-center text-zinc-500 text-sm mb-10 max-w-xl mx-auto">
           ~7.5% all-in is roughly half the 13–15%+ eBay keeps on a typical sale.
         </p>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden mb-8">
-          <table className="w-full text-sm">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden mb-8 overflow-x-auto">
+          <table className="w-full min-w-[320px] text-sm">
             <thead className="bg-zinc-950 border-b border-zinc-800">
               <tr>
                 <th className="text-left p-4 font-medium">Fee type</th>
@@ -365,15 +349,15 @@ export default function CloserNet() {
       </section>
 
       {/* CloserValue AI */}
-      <section id="value" className="max-w-4xl mx-auto px-6 py-14 border-t border-zinc-800 bg-zinc-900">
+      <section id="value" className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-14 border-t border-zinc-800 bg-zinc-900">
         <div className="text-center mb-8">
-          <h2 className="text-4xl font-semibold mb-3">CloserValue AI</h2>
+          <h2 className="text-3xl sm:text-4xl font-semibold mb-3">CloserValue AI</h2>
           <p className="text-zinc-300 max-w-lg mx-auto">
             Enter your item title and category — we match it against sample averages to suggest a fair price range before you list.
           </p>
         </div>
 
-        <div className="max-w-md mx-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+        <div className="max-w-md mx-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-5 sm:p-8">
           <div className="space-y-4">
             <input type="text" placeholder="Item title" value={aiInput.title} onChange={(e) => setAiInput({...aiInput, title: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
             <select value={aiInput.category} onChange={(e) => setAiInput({...aiInput, category: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg">
@@ -400,8 +384,8 @@ export default function CloserNet() {
       </section>
 
       {/* Comparison Section */}
-      <section id="compare" className="max-w-7xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-4">Why Sellers Choose CloserNet</h2>
+      <section id="compare" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 border-t border-zinc-800">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-4">Why Sellers Choose CloserNet</h2>
         <p className="text-center text-zinc-400 mb-12">See how we compare to the biggest alternatives.</p>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -473,27 +457,27 @@ export default function CloserNet() {
       </section>
 
       {/* Trust & Safety */}
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800 bg-zinc-900">
-        <h2 className="text-4xl font-semibold text-center mb-12">Trust & Safety Built In</h2>
+      <section className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 border-t border-zinc-800 bg-zinc-900">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-8 sm:mb-12">Trust & Safety Built In</h2>
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Escrow Protection</h3>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 sm:p-8">
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4">Escrow Protection</h3>
             <p className="text-zinc-400">Stripe holds funds in escrow until the buyer confirms they received the item. No more shipping without payment security.</p>
           </div>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Fair for Both Sides</h3>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 sm:p-8">
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4">Fair for Both Sides</h3>
             <p className="text-zinc-400">Buyers get protection. Sellers get paid reliably. We built CloserNet to reduce risk for everyone involved.</p>
           </div>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Shipping + Insurance</h3>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-6 sm:p-8">
+            <h3 className="text-xl sm:text-2xl font-semibold mb-4">Shipping + Insurance</h3>
             <p className="text-zinc-400">Real-time rate estimates from USPS, UPS, and FedEx. Optional insurance protects high-value items in transit.</p>
           </div>
         </div>
       </section>
 
       {/* FAQ */}
-      <section id="faq" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-12">Frequently Asked Questions</h2>
+      <section id="faq" className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 border-t border-zinc-800">
+        <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-8 sm:mb-12">Frequently Asked Questions</h2>
         <div className="space-y-6">
           {[
             ["How much does it cost to sell?", "About 7.5% total: 4.5% CloserNet platform fee + 3% Stripe escrow & payment processing. That's roughly half what eBay keeps. See the fee breakdown above for examples."],
@@ -503,7 +487,7 @@ export default function CloserNet() {
             ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
             ["What is CloserValue AI?", "A pricing helper that uses sample category averages to suggest a ballpark range. Use it as a starting point and verify with your own research before listing."],
           ].map(([question, answer], i) => (
-            <div key={i} className="border border-zinc-800 rounded-2xl p-6">
+            <div key={i} className="border border-zinc-800 rounded-2xl p-5 sm:p-6">
               <h4 className="font-semibold text-lg mb-2">{question}</h4>
               <p className="text-zinc-400">{answer}</p>
             </div>
@@ -512,7 +496,7 @@ export default function CloserNet() {
       </section>
 
       {/* Search + Filter + Listings */}
-      <section className="max-w-6xl mx-auto px-6 py-8 border-t border-zinc-800">
+      <section className="max-w-6xl mx-auto px-4 sm:px-6 py-8 border-t border-zinc-800">
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <input type="text" placeholder="Search listings..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="flex-1 bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
           <select value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg md:w-52">
@@ -522,7 +506,7 @@ export default function CloserNet() {
 
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-3xl font-semibold">Browse Listings</h2>
+            <h2 className="text-2xl sm:text-3xl font-semibold">Browse Listings</h2>
             <p className="text-zinc-400 text-sm mt-2">
               Sample listings below show what the marketplace will look like at launch.
             </p>
@@ -544,22 +528,22 @@ export default function CloserNet() {
                   Sample listing
                 </span>
               </div>
-              <div className="p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <span className="text-xs px-3 py-1 bg-zinc-800 rounded-full">{listing.category}</span>
-                  <span className="font-semibold text-2xl">${listing.price}</span>
+              <div className="p-5 sm:p-6">
+                <div className="flex justify-between items-start gap-3 mb-3">
+                  <span className="text-xs px-3 py-1 bg-zinc-800 rounded-full shrink-0">{listing.category}</span>
+                  <span className="font-semibold text-xl sm:text-2xl shrink-0">${listing.price}</span>
                 </div>
-                <h3 className="font-semibold text-xl mb-2">{listing.title}</h3>
+                <h3 className="font-semibold text-lg sm:text-xl mb-2 break-words">{listing.title}</h3>
                 <p className="text-zinc-400 text-sm mb-4 line-clamp-2">{listing.description}</p>
 
-                <div className="text-sm space-y-1 mb-4">
-                  <div className="flex justify-between">
+                <div className="text-sm space-y-2 mb-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5">
                     <span className="text-zinc-400">Shipping</span>
-                    <span>${listing.shippingCost} ({listing.shippingMethod})</span>
+                    <span className="text-zinc-200 break-words sm:text-right">${listing.shippingCost} ({listing.shippingMethod})</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex flex-col sm:flex-row sm:justify-between gap-0.5">
                     <span className="text-zinc-400">Weight / Dimensions</span>
-                    <span>{listing.weight} lbs • {listing.dimensions} in</span>
+                    <span className="text-zinc-200">{listing.weight} lbs • {listing.dimensions} in</span>
                   </div>
                   {listing.insurance && (
                     <div className="flex justify-between text-green-400">
@@ -582,9 +566,9 @@ export default function CloserNet() {
         )}
       </section>
 
-      <footer className="border-t border-zinc-800 py-10 text-center text-sm text-zinc-500">
-        <p className="mb-3">CloserNet • Lower Fees • Escrow Protected • Smart Shipping</p>
-        <div className="flex justify-center gap-6">
+      <footer className="border-t border-zinc-800 py-10 px-4 text-center text-sm text-zinc-500">
+        <p className="mb-3 text-balance">CloserNet • Lower Fees • Escrow Protected • Smart Shipping</p>
+        <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-6">
           <Link href="/terms" className="hover:text-zinc-300">Terms of Service</Link>
           <Link href="/privacy" className="hover:text-zinc-300">Privacy Policy</Link>
           <a href="mailto:support@closernet.net" className="hover:text-zinc-300">Contact</a>
@@ -594,7 +578,7 @@ export default function CloserNet() {
       {/* Grok Prompt Modal */}
       {showGrokPrompt && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 max-w-lg mx-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5 sm:p-8 max-w-lg mx-4 w-[calc(100%-2rem)]">
             <h3 className="text-xl font-semibold mb-4">Research prompt (optional)</h3>
             <p className="text-zinc-400 text-sm mb-4">Copy this prompt to research comparable prices elsewhere.</p>
             <div className="bg-zinc-950 p-4 rounded-lg text-sm mb-6 border border-zinc-800">{grokPrompt}</div>

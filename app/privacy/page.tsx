@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main className="min-h-screen bg-zinc-950 text-white">
+    <main className="min-h-screen bg-zinc-950 text-white overflow-x-hidden">
       <nav className="border-b border-zinc-800">
-        <div className="max-w-3xl mx-auto px-6 py-5 flex justify-between items-center">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 sm:py-5 flex justify-between items-center gap-3">
           <Logo />
           <Link href="/terms" className="text-sm text-zinc-400 hover:text-white">
             Terms of Service
@@ -19,8 +19,8 @@ export default function PrivacyPage() {
         </div>
       </nav>
 
-      <article className="max-w-3xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-semibold mb-2">Privacy Policy</h1>
+      <article className="max-w-3xl mx-auto px-4 sm:px-6 py-10 sm:py-12">
+        <h1 className="text-3xl sm:text-4xl font-semibold mb-2">Privacy Policy</h1>
         <p className="text-zinc-400 text-sm mb-10">Last updated: June 23, 2026</p>
 
         <section className="space-y-8 text-zinc-300 leading-relaxed">
