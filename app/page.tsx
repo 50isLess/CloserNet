@@ -23,7 +23,7 @@ export default function CloserNet() {
       id: 1,
       title: "Sony WH-1000XM5 Headphones",
       price: 280,
-      description: "Excellent condition. Barely used. Original box included.",
+      description: "Excellent condition. Barely used.",
       category: "Audio",
       image: "https://picsum.photos/id/1015/400/300",
       shippingCost: 12,
@@ -31,35 +31,7 @@ export default function CloserNet() {
       weight: 2,
       dimensions: "10 × 8 × 4",
       insurance: true,
-      insuranceCost: 4
-    },
-    {
-      id: 2,
-      title: "The Dark Side of the Moon - Pink Floyd (Vinyl)",
-      price: 45,
-      description: "Original pressing in great shape.",
-      category: "Vinyl",
-      image: "https://picsum.photos/id/1016/400/300",
-      shippingCost: 8,
-      shippingMethod: "USPS Ground",
-      weight: 1.2,
-      dimensions: "12 × 12 × 1",
-      insurance: false,
-      insuranceCost: 0
-    },
-    {
-      id: 3,
-      title: "MacBook Pro 16\" M3 Max",
-      price: 2450,
-      description: "2024 model. 64GB RAM, 1TB SSD. Like new.",
-      category: "Electronics",
-      image: "https://picsum.photos/id/201/400/300",
-      shippingCost: 28,
-      shippingMethod: "UPS Ground",
-      weight: 7,
-      dimensions: "14 × 10 × 3",
-      insurance: true,
-      insuranceCost: 37
+      insuranceCost: 3
     }
   ]);
 
@@ -72,59 +44,34 @@ export default function CloserNet() {
   const [grokPrompt, setGrokPrompt] = useState("");
 
   const [newItem, setNewItem] = useState({
-    title: "",
-    price: "",
-    description: "",
-    category: "Audio",
-    image: "",
-    weight: "",
-    length: "",
-    width: "",
-    height: "",
-    insurance: false,
-    selectedShipping: ""
+    title: "", price: "", description: "", category: "Audio", image: "",
+    weight: "", length: "", width: "", height: "", insurance: false, selectedShipping: ""
   });
 
   const [shippingRates, setShippingRates] = useState<any[]>([]);
 
   const categories = ["All", "Audio", "Electronics", "Photography", "Collectibles", "Clothes", "Books", "Vinyl", "DVD", "CDs", "Other"];
 
-  // Improved shipping calculator (weight + dimensions)
+  // Shipping calculator with dimensions
   const calculateShippingRates = (weight: number, length: number, width: number, height: number) => {
     if (!weight || weight <= 0) return [];
-
-    const dimensionalWeight = Math.ceil((length * width * height) / 166); // Common divisor
+    const dimensionalWeight = Math.ceil((length * width * height) / 166);
     const billableWeight = Math.max(weight, dimensionalWeight);
 
-    const rates = [
-      {
-        method: "USPS Ground",
-        cost: Math.round(Math.max(7, billableWeight * 3.6)),
-        days: "2–5 business days"
-      },
-      {
-        method: "UPS Ground",
-        cost: Math.round(Math.max(9, billableWeight * 4.3)),
-        days: "1–5 business days"
-      },
-      {
-        method: "FedEx Ground",
-        cost: Math.round(Math.max(10, billableWeight * 4.6)),
-        days: "1–5 business days"
-      }
+    return [
+      { method: "USPS Ground", cost: Math.round(Math.max(7, billableWeight * 3.6)), days: "2–5 business days" },
+      { method: "UPS Ground", cost: Math.round(Math.max(9, billableWeight * 4.3)), days: "1–5 business days" },
+      { method: "FedEx Ground", cost: Math.round(Math.max(10, billableWeight * 4.6)), days: "1–5 business days" }
     ];
-    return rates;
   };
 
   const handleShippingInputsChange = () => {
-    const weightNum = parseFloat(newItem.weight) || 0;
-    const lengthNum = parseFloat(newItem.length) || 0;
-    const widthNum = parseFloat(newItem.width) || 0;
-    const heightNum = parseFloat(newItem.height) || 0;
-
-    if (weightNum > 0 && lengthNum > 0 && widthNum > 0 && heightNum > 0) {
-      const rates = calculateShippingRates(weightNum, lengthNum, widthNum, heightNum);
-      setShippingRates(rates);
+    const w = parseFloat(newItem.weight) || 0;
+    const l = parseFloat(newItem.length) || 0;
+    const wi = parseFloat(newItem.width) || 0;
+    const h = parseFloat(newItem.height) || 0;
+    if (w > 0 && l > 0 && wi > 0 && h > 0) {
+      setShippingRates(calculateShippingRates(w, l, wi, h));
     }
   };
 
@@ -152,7 +99,6 @@ export default function CloserNet() {
     if (lower.includes("leica")) basePrice *= 2.3;
     if (lower.includes("macbook")) basePrice *= 1.75;
     if (lower.includes("headphones")) basePrice *= 1.3;
-    if (lower.includes("vinyl")) basePrice *= 1.35;
 
     const low = Math.round(basePrice * 0.82);
     const high = Math.round(basePrice * 1.18);
@@ -169,16 +115,15 @@ export default function CloserNet() {
     e.preventDefault();
     if (!newItem.title || !newItem.price || !newItem.selectedShipping) return;
 
-    const weightNum = parseFloat(newItem.weight) || 1;
-    const lengthNum = parseFloat(newItem.length) || 8;
-    const widthNum = parseFloat(newItem.width) || 6;
-    const heightNum = parseFloat(newItem.height) || 4;
+    const w = parseFloat(newItem.weight) || 1;
+    const l = parseFloat(newItem.length) || 8;
+    const wi = parseFloat(newItem.width) || 6;
+    const h = parseFloat(newItem.height) || 4;
 
-    const rates = calculateShippingRates(weightNum, lengthNum, widthNum, heightNum);
+    const rates = calculateShippingRates(w, l, wi, h);
     const selectedRate = rates.find(r => r.method === newItem.selectedShipping);
-
     const itemValue = parseFloat(newItem.price);
-    const insuranceCost = newItem.insurance ? Math.ceil(itemValue * 0.015) : 0; // ~1.5% of value
+    const insuranceCost = newItem.insurance ? Math.ceil(itemValue * 0.015) : 0;
 
     const listing: Listing = {
       id: Date.now(),
@@ -189,10 +134,10 @@ export default function CloserNet() {
       image: newItem.image || "https://picsum.photos/id/1018/400/300",
       shippingCost: selectedRate ? selectedRate.cost : 10,
       shippingMethod: newItem.selectedShipping,
-      weight: weightNum,
-      dimensions: `${lengthNum} × ${widthNum} × ${heightNum}`,
+      weight: w,
+      dimensions: `${l} × ${wi} × ${h}`,
       insurance: newItem.insurance,
-      insuranceCost: insuranceCost
+      insuranceCost
     };
 
     setListings([listing, ...listings]);
@@ -212,29 +157,19 @@ export default function CloserNet() {
             </div>
             <div className="text-2xl font-semibold tracking-tight">CloserNet</div>
           </div>
-          <div className="flex items-center gap-6 text-sm">
-            <a href="#how" className="hover:text-zinc-400">How it Works</a>
-            <a href="#value" className="hover:text-zinc-400">CloserValue AI</a>
-            <a href="#compare" className="hover:text-zinc-400">Compare</a>
-            <a href="#faq" className="hover:text-zinc-400">FAQ</a>
-            <button onClick={() => setShowForm(!showForm)} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
-              {showForm ? "Close" : "Post Item"}
-            </button>
-          </div>
+          <button onClick={() => setShowForm(!showForm)} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
+            {showForm ? "Close" : "Post Item"}
+          </button>
         </div>
       </nav>
 
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
-        <div className="inline-block px-4 py-1 bg-zinc-900 rounded-full text-sm mb-6 border border-zinc-800">
-          Now with AI-powered pricing
-        </div>
         <h1 className="text-6xl md:text-7xl font-semibold tracking-tighter mb-6">
           Closer to real value.<br />Protected by escrow.
         </h1>
         <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-          A simpler peer-to-peer marketplace. Only ~5% total fees.<br />
-          Keep more of your money with built-in escrow protection.
+          A simpler peer-to-peer marketplace with ~5% total fees.
         </p>
         <div className="flex gap-4 justify-center">
           <button onClick={() => setShowForm(true)} className="px-8 py-3.5 bg-white text-black rounded-full text-lg font-medium hover:bg-zinc-200">
@@ -247,13 +182,13 @@ export default function CloserNet() {
       </section>
 
       {/* How it Works */}
-      <section id="how" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
+      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
         <h2 className="text-4xl font-semibold text-center mb-12">How CloserNet Works</h2>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { num: "01", title: "List Your Item", desc: "Enter weight & dimensions. We calculate real rates from USPS, UPS & FedEx." },
-            { num: "02", title: "Secure Escrow + Shipping", desc: "Buyer pays into escrow. You ship using your chosen method." },
-            { num: "03", title: "Get Paid Reliably", desc: "Funds released after buyer confirmation. Keep ~95% of your sale." }
+            { num: "01", title: "List Your Item", desc: "Add weight & dimensions. We calculate real shipping rates from USPS, UPS & FedEx." },
+            { num: "02", title: "Secure Escrow", desc: "Buyer pays into escrow. You ship using your chosen method." },
+            { num: "03", title: "Get Paid Reliably", desc: "Funds are released after buyer confirmation. Keep ~95% of your sale." }
           ].map((step, i) => (
             <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
               <div className="text-5xl font-bold text-zinc-700 mb-6">{step.num}</div>
@@ -294,73 +229,52 @@ export default function CloserNet() {
         </div>
       </section>
 
-      {/* CloserNet vs eBay Comparison */}
-      <section id="compare" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-12">CloserNet vs eBay</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border border-zinc-800 rounded-2xl overflow-hidden">
-            <thead className="bg-zinc-900">
-              <tr>
-                <th className="text-left p-6 font-medium">Feature</th>
-                <th className="text-center p-6 font-medium text-green-400">CloserNet</th>
-                <th className="text-center p-6 font-medium text-zinc-400">eBay</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {[
-                ["Total Fees", "~5%", "13%+"],
-                ["Escrow Protection", "Built-in & free", "Extra cost or limited"],
-                ["Shipping Rates", "Calculated from weight & dimensions", "Seller figures it out"],
-                ["Experience", "Simple & modern", "Complex with many rules"],
-                ["Seller Payout", "~95% of sale", "~87% of sale"],
-                ["Best For", "Used goods & collectibles", "New retail + auctions"],
-              ].map(([feature, closer, ebay], i) => (
-                <tr key={i} className="hover:bg-zinc-900/50">
-                  <td className="p-6 font-medium">{feature}</td>
-                  <td className="p-6 text-center text-green-400 font-medium">{closer}</td>
-                  <td className="p-6 text-center text-zinc-400">{ebay}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      {/* Comparison Section */}
+      <section className="max-w-6xl mx-auto px-6 py-16 border-t border-zinc-800">
+        <h2 className="text-4xl font-semibold text-center mb-4">Why Sellers Choose CloserNet</h2>
+        <p className="text-center text-zinc-400 mb-12">See how we compare to the biggest alternatives.</p>
 
-      {/* Trust & Safety */}
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800 bg-zinc-900">
-        <h2 className="text-4xl font-semibold text-center mb-12">Trust & Safety Built In</h2>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Escrow Protection</h3>
-            <p className="text-zinc-400">Money is held safely until the buyer confirms they received the item. No more shipping without payment security.</p>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6">
+            <h3 className="text-xl font-semibold mb-4 text-green-400">CloserNet</h3>
+            <ul className="space-y-2 text-sm">
+              <li>✓ ~5% total fees</li>
+              <li>✓ Built-in escrow protection</li>
+              <li>✓ Real shipping rates (USPS, UPS, FedEx)</li>
+              <li>✓ Insurance options available</li>
+              <li>✓ ~95% payout to seller</li>
+            </ul>
           </div>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Fair for Both Sides</h3>
-            <p className="text-zinc-400">Buyers get protection. Sellers get paid reliably. We built CloserNet to reduce risk for everyone involved.</p>
-          </div>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Shipping + Insurance</h3>
-            <p className="text-zinc-400">Real-time rate estimates from USPS, UPS, and FedEx. Optional insurance protects high-value items in transit.</p>
-          </div>
-        </div>
-      </section>
 
-      {/* FAQ */}
-      <section id="faq" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-12">Frequently Asked Questions</h2>
-        <div className="space-y-6">
-          {[
-            ["How much does it cost to sell?", "Only about 5% total fees — significantly lower than most marketplaces. You keep roughly 95% of every sale."],
-            ["How does escrow work?", "The buyer pays into escrow when they purchase. You ship the item. Funds are released once the buyer confirms delivery."],
-            ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
-            ["Should I add insurance?", "We recommend insurance for items over $100. It costs about 1.5% of the item value and protects against loss or damage in transit."],
-            ["How does CloserValue AI work?", "Enter your item title and category for a demo price range. For a more accurate estimate, use the Grok prompt for a real market suggestion."],
-          ].map(([question, answer], i) => (
-            <div key={i} className="border border-zinc-800 rounded-2xl p-6">
-              <h4 className="font-semibold text-lg mb-2">{question}</h4>
-              <p className="text-zinc-400">{answer}</p>
-            </div>
-          ))}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <h3 className="text-xl font-semibold mb-4">eBay</h3>
+            <ul className="space-y-2 text-sm text-zinc-400">
+              <li>13%+ total fees</li>
+              <li>Limited or paid escrow</li>
+              <li>Complex seller rules</li>
+              <li>~87% payout to seller</li>
+            </ul>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <h3 className="text-xl font-semibold mb-4">Facebook Marketplace</h3>
+            <ul className="space-y-2 text-sm text-zinc-400">
+              <li>Free (but no protection)</li>
+              <li>No escrow — high scam risk</li>
+              <li>Mostly local/in-person only</li>
+              <li>No built-in shipping tools</li>
+            </ul>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <h3 className="text-xl font-semibold mb-4">OfferUp</h3>
+            <ul className="space-y-2 text-sm text-zinc-400">
+              <li>Low fees but limited protection</li>
+              <li>Mostly local transactions</li>
+              <li>Weak buyer/seller safeguards</li>
+              <li>Basic shipping options</li>
+            </ul>
+          </div>
         </div>
       </section>
 
@@ -375,9 +289,6 @@ export default function CloserNet() {
 
         <h2 className="text-3xl font-semibold mb-8">Featured Listings</h2>
 
-        {filteredListings.length === 0 ? (
-          <p className="text-center text-zinc-400 py-10">No listings found.</p>
-        ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredListings.map((listing) => (
             <div key={listing.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
@@ -388,7 +299,7 @@ export default function CloserNet() {
                   <span className="font-semibold text-2xl">${listing.price}</span>
                 </div>
                 <h3 className="font-semibold text-xl mb-2">{listing.title}</h3>
-                <p className="text-zinc-400 text-sm mb-3 line-clamp-2">{listing.description}</p>
+                <p className="text-zinc-400 text-sm mb-4 line-clamp-2">{listing.description}</p>
                 
                 <div className="text-sm space-y-1 mb-4">
                   <div className="flex justify-between">
@@ -414,10 +325,9 @@ export default function CloserNet() {
             </div>
           ))}
         </div>
-        )}
       </section>
 
-      {/* Post Form with Dimensions + Insurance */}
+      {/* Post Form */}
       {showForm && (
         <section className="max-w-xl mx-auto px-6 py-10 border-t border-zinc-800">
           <h3 className="text-2xl font-semibold mb-6">Post a New Item</h3>
@@ -429,9 +339,8 @@ export default function CloserNet() {
               {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
 
-            {/* Weight & Dimensions */}
             <div className="grid grid-cols-2 gap-4">
-              <input type="number" step="0.1" placeholder="Weight (lbs)" value={newItem.weight} onChange={(e) => { setNewItem({...newItem, weight: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg" required />
+              <input type="number" step="0.1" placeholder="Weight (lbs)" value={newItem.weight} onChange={(e) => { setNewItem({...newItem, weight: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
               <div className="grid grid-cols-3 gap-2">
                 <input type="number" placeholder="L (in)" value={newItem.length} onChange={(e) => { setNewItem({...newItem, length: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
                 <input type="number" placeholder="W (in)" value={newItem.width} onChange={(e) => { setNewItem({...newItem, width: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
@@ -439,16 +348,11 @@ export default function CloserNet() {
               </div>
             </div>
 
-            {/* Calculated Shipping Rates */}
             {shippingRates.length > 0 && (
               <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
                 <p className="text-sm text-zinc-400 mb-3">Estimated Shipping Rates:</p>
                 {shippingRates.map((rate, index) => (
-                  <div 
-                    key={index} 
-                    onClick={() => selectShipping(rate.method, rate.cost)}
-                    className={`flex justify-between items-center p-3 rounded-lg mb-2 cursor-pointer transition-colors ${newItem.selectedShipping === rate.method ? 'bg-white text-black' : 'hover:bg-zinc-800'}`}
-                  >
+                  <div key={index} onClick={() => selectShipping(rate.method, rate.cost)} className={`flex justify-between items-center p-3 rounded-lg mb-2 cursor-pointer transition-colors ${newItem.selectedShipping === rate.method ? 'bg-white text-black' : 'hover:bg-zinc-800'}`}>
                     <div>
                       <div className="font-medium">{rate.method}</div>
                       <div className="text-xs text-zinc-400">{rate.days}</div>
@@ -459,14 +363,8 @@ export default function CloserNet() {
               </div>
             )}
 
-            {/* Insurance */}
             <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 p-4 rounded-lg">
-              <input 
-                type="checkbox" 
-                checked={newItem.insurance} 
-                onChange={(e) => setNewItem({...newItem, insurance: e.target.checked})} 
-                className="w-4 h-4" 
-              />
+              <input type="checkbox" checked={newItem.insurance} onChange={(e) => setNewItem({...newItem, insurance: e.target.checked})} className="w-4 h-4" />
               <span>Add Shipping Insurance (recommended for items over $100)</span>
             </div>
 
@@ -479,10 +377,6 @@ export default function CloserNet() {
           </form>
         </section>
       )}
-
-      <footer className="border-t border-zinc-800 py-10 text-center text-sm text-zinc-500">
-        CloserNet • Lower Fees • Escrow Protected • Smart Shipping
-      </footer>
 
       {/* Grok Prompt Modal */}
       {showGrokPrompt && (
