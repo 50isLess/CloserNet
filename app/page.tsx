@@ -462,6 +462,16 @@ export default function CloserNet() {
               <li>Basic shipping options</li>
             </ul>
           </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <h3 className="text-xl font-semibold mb-4">Depop</h3>
+            <ul className="space-y-2 text-sm text-zinc-400">
+              <li>~10%+ total fees</li>
+              <li>No built-in escrow</li>
+              <li>Fashion &amp; vintage focus</li>
+              <li>~90% payout to seller</li>
+            </ul>
+          </div>
         </div>
         <p className="text-center text-xs text-zinc-500 mt-6 max-w-3xl mx-auto leading-relaxed">
           * eBay all-in fees for US sellers without a Store: 13.25% final value fee on the first $7,500 of each sale
