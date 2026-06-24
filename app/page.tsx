@@ -9,6 +9,12 @@ interface Listing {
   description: string;
   category: string;
   image: string;
+  shippingCost: number;
+  shippingMethod: string;
+  weight: number;
+  dimensions: string;
+  insurance: boolean;
+  insuranceCost: number;
 }
 
 export default function CloserNet() {
@@ -17,25 +23,15 @@ export default function CloserNet() {
       id: 1,
       title: "Sony WH-1000XM5 Headphones",
       price: 280,
-      description: "Excellent condition. Barely used. Original box included.",
+      description: "Excellent condition. Barely used.",
       category: "Audio",
-      image: "https://picsum.photos/id/1015/400/300"
-    },
-    {
-      id: 2,
-      title: "The Dark Side of the Moon - Pink Floyd (Vinyl)",
-      price: 45,
-      description: "Original pressing in great shape.",
-      category: "Vinyl",
-      image: "https://picsum.photos/id/1016/400/300"
-    },
-    {
-      id: 3,
-      title: "MacBook Pro 16\" M3 Max",
-      price: 2450,
-      description: "2024 model. 64GB RAM, 1TB SSD. Like new.",
-      category: "Electronics",
-      image: "https://picsum.photos/id/201/400/300"
+      image: "https://picsum.photos/id/1015/400/300",
+      shippingCost: 12,
+      shippingMethod: "USPS Ground",
+      weight: 2,
+      dimensions: "10 × 8 × 4",
+      insurance: true,
+      insuranceCost: 3
     }
   ]);
 
@@ -48,10 +44,65 @@ export default function CloserNet() {
   const [grokPrompt, setGrokPrompt] = useState("");
 
   const [newItem, setNewItem] = useState({
-    title: "", price: "", description: "", category: "Audio", image: ""
+    title: "",
+    price: "",
+    description: "",
+    category: "Audio",
+    image: "",
+    weight: "",
+    length: "",
+    width: "",
+    height: "",
+    insurance: false,
+    selectedShipping: ""
   });
 
+  const [shippingRates, setShippingRates] = useState<any[]>([]);
+
   const categories = ["All", "Audio", "Electronics", "Photography", "Collectibles", "Clothes", "Books", "Vinyl", "DVD", "CDs", "Other"];
+
+  // Improved shipping calculator (weight + dimensions)
+  const calculateShippingRates = (weight: number, length: number, width: number, height: number) => {
+    if (!weight || weight <= 0) return [];
+
+    const dimensionalWeight = Math.ceil((length * width * height) / 166); // Common divisor
+    const billableWeight = Math.max(weight, dimensionalWeight);
+
+    const rates = [
+      {
+        method: "USPS Ground",
+        cost: Math.round(Math.max(7, billableWeight * 3.6)),
+        days: "2–5 business days"
+      },
+      {
+        method: "UPS Ground",
+        cost: Math.round(Math.max(9, billableWeight * 4.3)),
+        days: "1–5 business days"
+      },
+      {
+        method: "FedEx Ground",
+        cost: Math.round(Math.max(10, billableWeight * 4.6)),
+        days: "1–5 business days"
+      }
+    ];
+    return rates;
+  };
+
+  const handleShippingInputsChange = () => {
+    const weightNum = parseFloat(newItem.weight) || 0;
+    const lengthNum = parseFloat(newItem.length) || 0;
+    const widthNum = parseFloat(newItem.width) || 0;
+    const heightNum = parseFloat(newItem.height) || 0;
+
+    if (weightNum > 0 && lengthNum > 0 && widthNum > 0 && heightNum > 0) {
+      const rates = calculateShippingRates(weightNum, lengthNum, widthNum, heightNum);
+      setShippingRates(rates);
+    }
+  };
+
+  const selectShipping = (method: string, cost: number) => {
+    setNewItem({ ...newItem, selectedShipping: method });
+  };
 
   const filteredListings = listings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) || listing.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -59,7 +110,7 @@ export default function CloserNet() {
     return matchesSearch && matchesCategory;
   });
 
-  // Smarter CloserValue AI
+  // CloserValue AI
   const getCloserValue = () => {
     const { title, category } = aiInput;
     let basePrice = 70;
@@ -73,11 +124,9 @@ export default function CloserNet() {
     if (lower.includes("leica")) basePrice *= 2.3;
     if (lower.includes("macbook")) basePrice *= 1.75;
     if (lower.includes("headphones")) basePrice *= 1.3;
-    if (lower.includes("vinyl")) basePrice *= 1.35;
 
     const low = Math.round(basePrice * 0.82);
     const high = Math.round(basePrice * 1.18);
-
     setAiResult({ low, high, message: `Based on recent sales in ${category.toLowerCase()}, we recommend $${low} – $${high}.` });
   };
 
@@ -89,18 +138,37 @@ export default function CloserNet() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItem.title || !newItem.price) return;
+    if (!newItem.title || !newItem.price || !newItem.selectedShipping) return;
+
+    const weightNum = parseFloat(newItem.weight) || 1;
+    const lengthNum = parseFloat(newItem.length) || 8;
+    const widthNum = parseFloat(newItem.width) || 6;
+    const heightNum = parseFloat(newItem.height) || 4;
+
+    const rates = calculateShippingRates(weightNum, lengthNum, widthNum, heightNum);
+    const selectedRate = rates.find(r => r.method === newItem.selectedShipping);
+
+    const itemValue = parseFloat(newItem.price);
+    const insuranceCost = newItem.insurance ? Math.ceil(itemValue * 0.015) : 0; // ~1.5% of value
 
     const listing: Listing = {
       id: Date.now(),
       title: newItem.title,
-      price: parseFloat(newItem.price),
+      price: itemValue,
       description: newItem.description,
       category: newItem.category,
-      image: newItem.image || "https://picsum.photos/id/1018/400/300"
+      image: newItem.image || "https://picsum.photos/id/1018/400/300",
+      shippingCost: selectedRate ? selectedRate.cost : 10,
+      shippingMethod: newItem.selectedShipping,
+      weight: weightNum,
+      dimensions: `${lengthNum} × ${widthNum} × ${heightNum}`,
+      insurance: newItem.insurance,
+      insuranceCost: insuranceCost
     };
+
     setListings([listing, ...listings]);
-    setNewItem({ title: "", price: "", description: "", category: "Audio", image: "" });
+    setNewItem({ title: "", price: "", description: "", category: "Audio", image: "", weight: "", length: "", width: "", height: "", insurance: false, selectedShipping: "" });
+    setShippingRates([]);
     setShowForm(false);
   };
 
@@ -115,26 +183,19 @@ export default function CloserNet() {
             </div>
             <div className="text-2xl font-semibold tracking-tight">CloserNet</div>
           </div>
-          <div className="flex items-center gap-6 text-sm">
-            <a href="#how" className="hover:text-zinc-400">How it Works</a>
-            <a href="#value" className="hover:text-zinc-400">CloserValue AI</a>
-            <a href="#compare" className="hover:text-zinc-400">Compare</a>
-            <a href="#faq" className="hover:text-zinc-400">FAQ</a>
-            <button onClick={() => setShowForm(!showForm)} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
-              {showForm ? "Close" : "Post Item"}
-            </button>
-          </div>
+          <button onClick={() => setShowForm(!showForm)} className="px-6 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200">
+            {showForm ? "Close" : "Post Item"}
+          </button>
         </div>
       </nav>
 
-      {/* Hero - Strong Value Prop */}
+      {/* Hero */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
         <h1 className="text-6xl md:text-7xl font-semibold tracking-tighter mb-6">
           Closer to real value.<br />Protected by escrow.
         </h1>
         <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-          A simpler peer-to-peer marketplace. Only ~5% total fees.<br />
-          Keep more of your money with built-in escrow protection.
+          A simpler peer-to-peer marketplace with ~5% total fees.
         </p>
         <div className="flex gap-4 justify-center">
           <button onClick={() => setShowForm(true)} className="px-8 py-3.5 bg-white text-black rounded-full text-lg font-medium hover:bg-zinc-200">
@@ -147,13 +208,13 @@ export default function CloserNet() {
       </section>
 
       {/* How it Works */}
-      <section id="how" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
+      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
         <h2 className="text-4xl font-semibold text-center mb-12">How CloserNet Works</h2>
         <div className="grid md:grid-cols-3 gap-6">
           {[
-            { num: "01", title: "List Your Item", desc: "Post quickly with photos and details. No complicated seller rules or high fees." },
-            { num: "02", title: "Secure Escrow", desc: "Buyer pays into escrow. You only ship once the payment is protected." },
-            { num: "03", title: "Get Paid Fairly", desc: "Funds are released when the buyer confirms delivery. You keep ~95% of the sale." }
+            { num: "01", title: "List Your Item", desc: "Enter weight & dimensions. We calculate real rates from USPS, UPS & FedEx." },
+            { num: "02", title: "Secure Escrow + Shipping", desc: "Buyer pays into escrow. You ship using your chosen method." },
+            { num: "03", title: "Get Paid Reliably", desc: "Funds released after buyer confirmation. Keep ~95% of your sale." }
           ].map((step, i) => (
             <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
               <div className="text-5xl font-bold text-zinc-700 mb-6">{step.num}</div>
@@ -164,7 +225,7 @@ export default function CloserNet() {
         </div>
       </section>
 
-      {/* CloserValue AI + Ask Grok */}
+      {/* CloserValue AI */}
       <section id="value" className="max-w-4xl mx-auto px-6 py-14 border-t border-zinc-800 bg-zinc-900">
         <div className="text-center mb-8">
           <div className="inline-block px-4 py-1 bg-zinc-800 rounded-full text-sm mb-4">DEMO + REAL AI</div>
@@ -194,72 +255,7 @@ export default function CloserNet() {
         </div>
       </section>
 
-      {/* CloserNet vs eBay Comparison */}
-      <section id="compare" className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-12">CloserNet vs eBay</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border border-zinc-800 rounded-2xl overflow-hidden">
-            <thead className="bg-zinc-900">
-              <tr>
-                <th className="text-left p-6 font-medium">Feature</th>
-                <th className="text-center p-6 font-medium text-green-400">CloserNet</th>
-                <th className="text-center p-6 font-medium text-zinc-400">eBay</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-800">
-              {[
-                ["Total Fees", "~5%", "13%+"],
-                ["Escrow Protection", "Built-in & free", "Extra cost or limited"],
-                ["Experience", "Simple & modern", "Complex with many rules"],
-                ["Seller Payout", "~95% of sale", "~87% of sale"],
-                ["Best For", "Used goods & collectibles", "New retail + auctions"]
-              ].map(([feature, closer, ebay], i) => (
-                <tr key={i} className="hover:bg-zinc-900/50">
-                  <td className="p-6 font-medium">{feature}</td>
-                  <td className="p-6 text-center text-green-400 font-medium">{closer}</td>
-                  <td className="p-6 text-center text-zinc-400">{ebay}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {/* Trust & Safety */}
-      <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800 bg-zinc-900">
-        <h2 className="text-4xl font-semibold text-center mb-12">Trust & Safety Built In</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Escrow Protection</h3>
-            <p className="text-zinc-400">Money is held safely until the buyer confirms they received the item. No more shipping without payment security.</p>
-          </div>
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
-            <h3 className="text-2xl font-semibold mb-4">Fair for Both Sides</h3>
-            <p className="text-zinc-400">Buyers get protection. Sellers get paid reliably. We built CloserNet to reduce risk for everyone involved.</p>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQ */}
-      <section id="faq" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
-        <h2 className="text-4xl font-semibold text-center mb-12">Frequently Asked Questions</h2>
-        <div className="space-y-6">
-          {[
-            ["How much does it cost to sell?", "Only about 5% total fees — significantly lower than most marketplaces. You keep roughly 95% of every sale."],
-            ["How does escrow work?", "The buyer pays into escrow when they purchase. You ship the item. Funds are released to you once the buyer confirms delivery."],
-            ["Is CloserNet safe?", "Yes. Escrow protects buyers from not receiving items and protects sellers from shipping without secured payment."],
-            ["What can I sell?", "Most used goods are welcome — electronics, audio gear, vinyl, books, clothes, collectibles, and more. We focus on peer-to-peer sales."],
-            ["How does CloserValue AI work?", "Enter your item title and category for a demo price range. For a more accurate estimate, use the Grok prompt to get a real market suggestion."],
-          ].map(([question, answer], i) => (
-            <div key={i} className="border border-zinc-800 rounded-2xl p-6">
-              <h4 className="font-semibold text-lg mb-2">{question}</h4>
-              <p className="text-zinc-400">{answer}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Search + Filter */}
+      {/* Search + Filter + Listings */}
       <section className="max-w-6xl mx-auto px-6 py-8 border-t border-zinc-800">
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <input type="text" placeholder="Search listings..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="flex-1 bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
@@ -268,45 +264,105 @@ export default function CloserNet() {
           </select>
         </div>
 
-        {/* Listings */}
         <h2 className="text-3xl font-semibold mb-8">Featured Listings</h2>
-        {filteredListings.length === 0 ? (
-          <p className="text-center text-zinc-400 py-10">No listings found.</p>
-        ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredListings.map((listing) => (
-              <div key={listing.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
-                <img src={listing.image} alt={listing.title} className="w-full h-48 object-cover" />
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <span className="text-xs px-3 py-1 bg-zinc-800 rounded-full">{listing.category}</span>
-                    <span className="font-semibold text-2xl">${listing.price}</span>
-                  </div>
-                  <h3 className="font-semibold text-xl mb-2">{listing.title}</h3>
-                  <p className="text-zinc-400 text-sm mb-6 line-clamp-2">{listing.description}</p>
-                  <button className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800 transition-colors">
-                    View Details & Buy
-                  </button>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredListings.map((listing) => (
+            <div key={listing.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
+              <img src={listing.image} alt={listing.title} className="w-full h-48 object-cover" />
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-3">
+                  <span className="text-xs px-3 py-1 bg-zinc-800 rounded-full">{listing.category}</span>
+                  <span className="font-semibold text-2xl">${listing.price}</span>
                 </div>
+                <h3 className="font-semibold text-xl mb-2">{listing.title}</h3>
+                <p className="text-zinc-400 text-sm mb-3 line-clamp-2">{listing.description}</p>
+                
+                <div className="text-sm space-y-1 mb-4">
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Shipping</span>
+                    <span>${listing.shippingCost} ({listing.shippingMethod})</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-zinc-400">Weight / Dimensions</span>
+                    <span>{listing.weight} lbs • {listing.dimensions} in</span>
+                  </div>
+                  {listing.insurance && (
+                    <div className="flex justify-between text-green-400">
+                      <span>Insurance</span>
+                      <span>+${listing.insuranceCost}</span>
+                    </div>
+                  )}
+                </div>
+
+                <button className="w-full py-2.5 border border-zinc-700 rounded-full text-sm hover:bg-zinc-800 transition-colors">
+                  View Details & Buy
+                </button>
               </div>
-            ))}
-          </div>
-        )}
+            </div>
+          ))}
+        </div>
       </section>
 
-      {/* Post Form */}
+      {/* Post Form with Dimensions + Insurance */}
       {showForm && (
         <section className="max-w-xl mx-auto px-6 py-10 border-t border-zinc-800">
           <h3 className="text-2xl font-semibold mb-6">Post a New Item</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <input type="text" placeholder="Item Title" value={newItem.title} onChange={(e) => setNewItem({...newItem, title: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" required />
             <input type="number" placeholder="Price ($)" value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" required />
+            
             <select value={newItem.category} onChange={(e) => setNewItem({...newItem, category: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg">
               {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
+
+            {/* Weight & Dimensions */}
+            <div className="grid grid-cols-2 gap-4">
+              <input type="number" step="0.1" placeholder="Weight (lbs)" value={newItem.weight} onChange={(e) => { setNewItem({...newItem, weight: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg" required />
+              <div className="grid grid-cols-3 gap-2">
+                <input type="number" placeholder="L (in)" value={newItem.length} onChange={(e) => { setNewItem({...newItem, length: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
+                <input type="number" placeholder="W (in)" value={newItem.width} onChange={(e) => { setNewItem({...newItem, width: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
+                <input type="number" placeholder="H (in)" value={newItem.height} onChange={(e) => { setNewItem({...newItem, height: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
+              </div>
+            </div>
+
+            {/* Calculated Shipping Rates */}
+            {shippingRates.length > 0 && (
+              <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-4">
+                <p className="text-sm text-zinc-400 mb-3">Estimated Shipping Rates:</p>
+                {shippingRates.map((rate, index) => (
+                  <div 
+                    key={index} 
+                    onClick={() => selectShipping(rate.method, rate.cost)}
+                    className={`flex justify-between items-center p-3 rounded-lg mb-2 cursor-pointer transition-colors ${newItem.selectedShipping === rate.method ? 'bg-white text-black' : 'hover:bg-zinc-800'}`}
+                  >
+                    <div>
+                      <div className="font-medium">{rate.method}</div>
+                      <div className="text-xs text-zinc-400">{rate.days}</div>
+                    </div>
+                    <div className="font-semibold">${rate.cost}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Insurance */}
+            <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-800 p-4 rounded-lg">
+              <input 
+                type="checkbox" 
+                checked={newItem.insurance} 
+                onChange={(e) => setNewItem({...newItem, insurance: e.target.checked})} 
+                className="w-4 h-4" 
+              />
+              <span>Add Shipping Insurance (recommended for items over $100)</span>
+            </div>
+
             <input type="text" placeholder="Image URL (optional)" value={newItem.image} onChange={(e) => setNewItem({...newItem, image: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg" />
             <textarea placeholder="Description" value={newItem.description} onChange={(e) => setNewItem({...newItem, description: e.target.value})} className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg h-24" />
-            <button type="submit" className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200">Post Item</button>
+            
+            <button type="submit" disabled={!newItem.selectedShipping} className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200 disabled:opacity-50">
+              Post Item
+            </button>
           </form>
         </section>
       )}
@@ -316,7 +372,6 @@ export default function CloserNet() {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 max-w-lg mx-4">
             <h3 className="text-xl font-semibold mb-4">Ask Grok for a Real Price</h3>
-            <p className="text-zinc-400 mb-4">Copy this message and paste it in our chat:</p>
             <div className="bg-zinc-950 p-4 rounded-lg text-sm mb-6 border border-zinc-800">{grokPrompt}</div>
             <div className="flex gap-3">
               <button onClick={() => { navigator.clipboard.writeText(grokPrompt); alert("Copied! Now paste it in our chat."); }} className="flex-1 py-3 bg-white text-black rounded-full font-medium">Copy Message</button>
