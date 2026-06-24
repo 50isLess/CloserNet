@@ -167,6 +167,7 @@ export default function CloserNet() {
           </div>
           <div className="flex items-center gap-6 text-sm">
             <a href="#how" className="hover:text-zinc-400">How it Works</a>
+            <a href="#escrow" className="hover:text-zinc-400">Escrow</a>
             <a href="#value" className="hover:text-zinc-400">CloserValue AI</a>
             <a href="#fees" className="hover:text-zinc-400">Fees</a>
             <a href="#compare" className="hover:text-zinc-400">Compare</a>
@@ -244,6 +245,73 @@ export default function CloserNet() {
             </div>
           ))}
         </div>
+      </section>
+
+      {/* How Escrow Works */}
+      <section id="escrow" className="max-w-6xl mx-auto px-6 py-16 border-t border-zinc-800">
+        <h2 className="text-4xl font-semibold text-center mb-4">How Escrow Works</h2>
+        <p className="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
+          Neither side takes the risk alone. Payment stays locked until the deal is done.
+        </p>
+
+        <div className="hidden lg:flex items-center justify-center gap-2">
+          {[
+            { step: "1", title: "Buyer Pays", desc: "Checkout secures the full amount in escrow.", icon: "💳", role: "Buyer" },
+            { step: "2", title: "Funds Held", desc: "CloserNet holds payment — not the seller.", icon: "🔒", role: "Protected" },
+            { step: "3", title: "Seller Ships", desc: "Seller ships only after payment is secured.", icon: "📦", role: "Seller" },
+            { step: "4", title: "Funds Released", desc: "Seller gets paid after delivery is confirmed.", icon: "✓", role: "Complete" },
+          ].map((item, i, arr) => (
+            <div key={item.step} className="flex items-center">
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 w-52 text-center">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-2xl">
+                  {item.icon}
+                </div>
+                <div className="text-xs uppercase tracking-wide text-green-400 mb-2">{item.role}</div>
+                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                <p className="text-sm text-zinc-400 leading-snug">{item.desc}</p>
+              </div>
+              {i < arr.length - 1 && (
+                <div className="flex items-center px-3 text-zinc-600" aria-hidden="true">
+                  <div className="w-8 border-t border-dashed border-zinc-600" />
+                  <span className="text-xl mx-1">→</span>
+                  <div className="w-8 border-t border-dashed border-zinc-600" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="lg:hidden space-y-4 max-w-sm mx-auto">
+          {[
+            { step: "1", title: "Buyer Pays", desc: "Checkout secures the full amount in escrow.", icon: "💳" },
+            { step: "2", title: "Funds Held", desc: "CloserNet holds payment — not the seller.", icon: "🔒" },
+            { step: "3", title: "Seller Ships", desc: "Seller ships only after payment is secured.", icon: "📦" },
+            { step: "4", title: "Funds Released", desc: "Seller gets paid after delivery is confirmed.", icon: "✓" },
+          ].map((item, i, arr) => (
+            <div key={item.step}>
+              <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 flex gap-4 items-start">
+                <div className="w-12 h-12 shrink-0 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xl">
+                  {item.icon}
+                </div>
+                <div>
+                  <div className="text-xs text-zinc-500 mb-1">Step {item.step}</div>
+                  <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
+                  <p className="text-sm text-zinc-400">{item.desc}</p>
+                </div>
+              </div>
+              {i < arr.length - 1 && (
+                <div className="flex justify-center py-2 text-zinc-600" aria-hidden="true">↓</div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <p className="text-center text-xs text-zinc-500 mt-10 max-w-xl mx-auto">
+          If something goes wrong, either party can open a dispute before funds are released.
+          See our{" "}
+          <Link href="/terms" className="underline hover:text-zinc-400">Terms of Service</Link>
+          {" "}for full escrow and dispute policies.
+        </p>
       </section>
 
       {/* Fee Breakdown */}
@@ -419,7 +487,7 @@ export default function CloserNet() {
           {[
             ["How much does it cost to sell?", "About 5% total: 3% CloserNet platform fee + ~2% payment processing. See the fee breakdown above for examples."],
             ["How do I get early access?", "Join the waitlist with your email at the top of this page. We'll notify you when seller accounts and checkout go live."],
-            ["How does escrow work?", "The buyer pays into escrow when they purchase. You ship the item. Funds are released once the buyer confirms delivery."],
+            ["How does escrow work?", "Buyer pays at checkout and funds are held by CloserNet — not the seller. The seller ships once payment is secured. Funds release to the seller after the buyer confirms delivery. See the How Escrow Works section above for the full flow."],
             ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
             ["What is CloserValue AI?", "A prototype tool using sample category averages — not live market data. Use it for a ballpark range and verify with your own research before listing."],
           ].map(([question, answer], i) => (
