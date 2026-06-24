@@ -354,10 +354,10 @@ export default function CloserNet() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <h3 className="text-xl font-semibold mb-4">eBay</h3>
             <ul className="space-y-2 text-sm text-zinc-400">
-              <li>13%+ total fees</li>
+              <li>13–15%+ total fees</li>
               <li>Limited or paid escrow</li>
               <li>Complex seller rules</li>
-              <li>~87% payout to seller</li>
+              <li>~85–87% payout to seller</li>
             </ul>
           </div>
 
@@ -381,10 +381,13 @@ export default function CloserNet() {
             </ul>
           </div>
         </div>
-        <p className="text-center text-xs text-zinc-500 mt-6">
-          * eBay fee comparison based on standard category final value fee + payment processing (~13.25% total), per{" "}
+        <p className="text-center text-xs text-zinc-500 mt-6 max-w-3xl mx-auto leading-relaxed">
+          * eBay all-in fees for US sellers without a Store: 13.25% final value fee on the first $7,500 of each sale
+          (category rates vary — e.g. 6.7% musical instruments, 15.3% books), plus a $0.40 per-order fee on sales over $10,
+          applied to item price + shipping. Most standard categories land at 13.5–15%+ before promoted listings.
+          Per{" "}
           <a href="https://www.ebay.com/help/selling/fees-credits-invoices/selling-fees?id=4822" className="underline hover:text-zinc-400" target="_blank" rel="noopener noreferrer">
-            eBay seller fees
+            eBay&apos;s 2026 fee schedule
           </a>
           , June 2026.
         </p>
