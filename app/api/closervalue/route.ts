@@ -6,6 +6,13 @@ import {
 
 const XAI_API_URL = "https://api.x.ai/v1/chat/completions";
 
+export async function GET() {
+  return NextResponse.json({
+    configured: Boolean(process.env.XAI_API_KEY),
+    model: process.env.XAI_MODEL ?? "grok-3-mini",
+  });
+}
+
 export async function POST(request: Request) {
   const apiKey = process.env.XAI_API_KEY;
   if (!apiKey) {
