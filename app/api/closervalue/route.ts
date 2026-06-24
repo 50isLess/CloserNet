@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseCloserValueResponse } from "@/lib/closervalue";
+import { getXaiApiKey, getXaiKeyDiagnostics } from "@/lib/xai";
 
 export const runtime = "nodejs";
 
@@ -7,21 +8,32 @@ const XAI_API_URL = "https://api.x.ai/v1/chat/completions";
 const DEFAULT_MODEL = "grok-3-latest";
 
 export async function GET() {
-  const apiKey = process.env.XAI_API_KEY?.trim();
+  const apiKey = getXaiApiKey();
+  const diagnostics = getXaiKeyDiagnostics();
+
   return NextResponse.json({
     configured: Boolean(apiKey),
     model: process.env.XAI_MODEL?.trim() ?? DEFAULT_MODEL,
+    ...diagnostics,
   });
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.XAI_API_KEY?.trim();
+  const apiKey = getXaiApiKey();
 
   if (!apiKey) {
+    const diagnostics = getXaiKeyDiagnostics();
     return NextResponse.json(
       {
         error:
           "CloserValue AI is not configured. Add XAI_API_KEY in Vercel → Settings → Environment Variables (Production), then redeploy.",
+        hint:
+          diagnostics.checks.some((check) => check.defined && check.trimmedLength === 0)
+            ? "A matching env var exists but its value is empty or whitespace. Re-enter the key and redeploy."
+            : diagnostics.relatedEnvKeys.length > 0
+              ? `Found related vars (${diagnostics.relatedEnvKeys.join(", ")}) but none have a usable value. Use exactly XAI_API_KEY.`
+              : "No XAI/Grok env vars were found on this deployment. Confirm you edited the closernet Vercel project and enabled Production.",
+        diagnostics,
       },
       { status: 503 }
     );
