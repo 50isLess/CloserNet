@@ -64,7 +64,7 @@ export default function OpenGraphImage() {
           Protected by escrow.
         </div>
         <div style={{ fontSize: "30px", color: "#a1a1aa", maxWidth: "820px", lineHeight: 1.4 }}>
-          Peer-to-peer marketplace with ~5% total fees, built-in escrow, and smart shipping.
+          Peer-to-peer marketplace with ~7.5% total fees, Stripe escrow, and smart shipping.
         </div>
         <div
           style={{
@@ -73,7 +73,7 @@ export default function OpenGraphImage() {
             marginTop: "48px",
           }}
         >
-          {["~5% fees", "Escrow protected", "USPS · UPS · FedEx"].map((label) => (
+          {["~7.5% fees", "Stripe escrow", "USPS · UPS · FedEx"].map((label) => (
             <div
               key={label}
               style={{

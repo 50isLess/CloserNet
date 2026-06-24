@@ -112,21 +112,24 @@ export default function TermsPage() {
           <div>
             <h2 className="text-xl font-semibold text-white mb-2">8. Fees & payments</h2>
             <p className="mb-3">
-              CloserNet charges sellers a total platform fee of approximately 5% per completed sale, which may include
-              payment processing costs passed through at cost. Exact fee breakdowns are displayed before you list and
-              at checkout. Fees may change with reasonable notice posted on the Platform.
+              CloserNet charges sellers a total fee of approximately 7.5% per completed sale, including Stripe escrow
+              and payment processing. This typically comprises a CloserNet platform fee plus Stripe escrow and processing
+              costs. Exact fee breakdowns are displayed before you list and at checkout. Fees may change with reasonable
+              notice posted on the Platform.
             </p>
             <p>
-              Payments are processed by third-party payment providers. By transacting on the Platform, you agree to
-              their terms and authorize us to share transaction data necessary to complete payments and escrow services.
+              Payments and escrow are processed by Stripe, Inc. and other third-party providers as applicable. By
+              transacting on the Platform, you agree to Stripe&apos;s terms and authorize us to share transaction data
+              necessary to complete payments and escrow services.
             </p>
           </div>
 
           <div>
             <h2 className="text-xl font-semibold text-white mb-2">9. Escrow</h2>
             <p className="mb-3">
-              Where escrow is available, buyer funds are held by CloserNet or a licensed payment partner until
-              delivery is confirmed or a dispute is resolved according to Platform rules. The general flow is:
+              Where escrow is available, buyer funds are held by Stripe, acting as our escrow and payment agent, until
+              delivery is confirmed or a dispute is resolved according to Platform rules. CloserNet facilitates the
+              transaction but does not directly hold buyer funds. The general flow is:
             </p>
             <ol className="list-decimal pl-6 space-y-1 mb-3">
               <li>Buyer pays at checkout and funds enter escrow.</li>

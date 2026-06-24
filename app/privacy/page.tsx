@@ -91,7 +91,8 @@ export default function PrivacyPage() {
             <ul className="list-disc pl-6 space-y-2">
               <li>
                 <strong className="text-white">Service providers</strong> under contract — including hosting (e.g., Vercel),
-                email delivery (e.g., Resend), payment processors, identity verification vendors, and analytics providers.
+                email delivery (e.g., Resend), payment and escrow processing (e.g., Stripe), identity verification vendors,
+                and analytics providers.
               </li>
               <li>
                 <strong className="text-white">Other users</strong> as needed to complete transactions — such as shipping

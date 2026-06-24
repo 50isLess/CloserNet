@@ -181,8 +181,8 @@ export default function CloserNet() {
           Closer to real value.<br />Protected by escrow.
         </h1>
         <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-          A simpler peer-to-peer marketplace. Only ~5% total fees.<br />
-          Keep more of your money with built-in escrow protection.
+          A simpler peer-to-peer marketplace. Only ~7.5% total fees, including Stripe escrow.<br />
+          That&apos;s roughly half what eBay keeps — with real payment protection built in.
         </p>
 
         <form onSubmit={handleWaitlistSubmit} className="max-w-md mx-auto mb-6">
@@ -231,8 +231,8 @@ export default function CloserNet() {
           {[
             { num: "01", title: "Create Account", desc: "Sign up free with email. Verify identity before your first sale goes live." },
             { num: "02", title: "List Your Item", desc: "Add photos, price, weight & dimensions. We estimate USPS, UPS & FedEx rates." },
-            { num: "03", title: "Secure Escrow", desc: "Buyer pays into escrow at checkout. You ship only after payment is secured." },
-            { num: "04", title: "Get Paid", desc: "Funds release after delivery confirmation. You keep ~95% after our ~5% total fee." }
+            { num: "03", title: "Secure Escrow", desc: "Buyer pays at checkout. Stripe holds funds in escrow until delivery is confirmed." },
+            { num: "04", title: "Get Paid", desc: "Funds release after delivery confirmation. You keep ~92.5% after our ~7.5% total fee." }
           ].map((step, i) => (
             <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
               <div className="text-5xl font-bold text-zinc-700 mb-6">{step.num}</div>
@@ -246,14 +246,17 @@ export default function CloserNet() {
       {/* How Escrow Works */}
       <section id="escrow" className="max-w-6xl mx-auto px-6 py-16 border-t border-zinc-800">
         <h2 className="text-4xl font-semibold text-center mb-4">How Escrow Works</h2>
-        <p className="text-center text-zinc-400 mb-12 max-w-2xl mx-auto">
-          Neither side takes the risk alone. Payment stays locked until the deal is done.
+        <p className="text-center text-zinc-400 mb-4 max-w-2xl mx-auto">
+          Neither side takes the risk alone. Stripe acts as our escrow agent — payment stays locked until the deal is done.
+        </p>
+        <p className="text-center text-zinc-500 text-sm mb-12 max-w-xl mx-auto">
+          CloserNet facilitates the transaction; Stripe holds and releases funds according to delivery confirmation.
         </p>
 
         <div className="hidden lg:flex items-center justify-center gap-2">
           {[
-            { step: "1", title: "Buyer Pays", desc: "Checkout secures the full amount in escrow.", icon: "💳", role: "Buyer" },
-            { step: "2", title: "Funds Held", desc: "CloserNet holds payment — not the seller.", icon: "🔒", role: "Protected" },
+            { step: "1", title: "Buyer Pays", desc: "Checkout secures the full amount via Stripe.", icon: "💳", role: "Buyer" },
+            { step: "2", title: "Funds Held", desc: "Stripe holds payment in escrow — not the seller.", icon: "🔒", role: "Stripe" },
             { step: "3", title: "Seller Ships", desc: "Seller ships only after payment is secured.", icon: "📦", role: "Seller" },
             { step: "4", title: "Funds Released", desc: "Seller gets paid after delivery is confirmed.", icon: "✓", role: "Complete" },
           ].map((item, i, arr) => (
@@ -279,8 +282,8 @@ export default function CloserNet() {
 
         <div className="lg:hidden space-y-4 max-w-sm mx-auto">
           {[
-            { step: "1", title: "Buyer Pays", desc: "Checkout secures the full amount in escrow.", icon: "💳" },
-            { step: "2", title: "Funds Held", desc: "CloserNet holds payment — not the seller.", icon: "🔒" },
+            { step: "1", title: "Buyer Pays", desc: "Checkout secures the full amount via Stripe.", icon: "💳" },
+            { step: "2", title: "Funds Held", desc: "Stripe holds payment in escrow — not the seller.", icon: "🔒" },
             { step: "3", title: "Seller Ships", desc: "Seller ships only after payment is secured.", icon: "📦" },
             { step: "4", title: "Funds Released", desc: "Seller gets paid after delivery is confirmed.", icon: "✓" },
           ].map((item, i, arr) => (
@@ -313,7 +316,10 @@ export default function CloserNet() {
       {/* Fee Breakdown */}
       <section id="fees" className="max-w-4xl mx-auto px-6 py-16 border-t border-zinc-800">
         <h2 className="text-4xl font-semibold text-center mb-4">Transparent Fee Breakdown</h2>
-        <p className="text-center text-zinc-400 mb-10">No hidden charges. Here is exactly what a seller pays on a completed sale.</p>
+        <p className="text-center text-zinc-400 mb-4">No hidden charges. Here is exactly what a seller pays on a completed sale.</p>
+        <p className="text-center text-zinc-500 text-sm mb-10 max-w-xl mx-auto">
+          ~7.5% all-in is roughly half the 13–15%+ eBay keeps on a typical sale.
+        </p>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden mb-8">
           <table className="w-full text-sm">
@@ -326,9 +332,9 @@ export default function CloserNet() {
             </thead>
             <tbody className="divide-y divide-zinc-800">
               {[
-                ["CloserNet platform fee", "3.0%", "Marketplace, escrow, listing tools"],
-                ["Payment processing", "2.0%", "Card/bank processing (passed through at cost)"],
-                ["Total seller fee", "~5.0%", "Combined — you keep ~95% of the sale price"],
+                ["CloserNet platform fee", "4.5%", "Marketplace, listing tools, support"],
+                ["Stripe escrow & processing", "3.0%", "Escrow hold, payment processing (via Stripe)"],
+                ["Total seller fee", "~7.5%", "Combined — you keep ~92.5% of the sale price"],
               ].map(([fee, rate, covers], i) => (
                 <tr key={i} className={i === 2 ? "bg-zinc-950" : ""}>
                   <td className={`p-4 ${i === 2 ? "font-semibold text-white" : ""}`}>{fee}</td>
@@ -342,9 +348,9 @@ export default function CloserNet() {
 
         <div className="grid md:grid-cols-3 gap-4 text-center">
           {[
-            { price: 50, fee: 2.50, payout: 47.50 },
-            { price: 200, fee: 10, payout: 190 },
-            { price: 1000, fee: 50, payout: 950 },
+            { price: 50, fee: 3.75, payout: 46.25 },
+            { price: 200, fee: 15, payout: 185 },
+            { price: 1000, fee: 75, payout: 925 },
           ].map((ex) => (
             <div key={ex.price} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
               <div className="text-zinc-400 text-sm mb-1">${ex.price} sale</div>
@@ -402,11 +408,11 @@ export default function CloserNet() {
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6">
             <h3 className="text-xl font-semibold mb-4 text-green-400">CloserNet</h3>
             <ul className="space-y-2 text-sm">
-              <li>✓ ~5% total fees</li>
-              <li>✓ Built-in escrow protection</li>
+              <li>✓ ~7.5% total fees (incl. Stripe escrow)</li>
+              <li>✓ Stripe-powered escrow protection</li>
+              <li>✓ Roughly half what eBay keeps</li>
               <li>✓ Real shipping rates (USPS, UPS, FedEx)</li>
-              <li>✓ Insurance options available</li>
-              <li>✓ ~95% payout to seller</li>
+              <li>✓ ~92.5% payout to seller</li>
             </ul>
           </div>
 
@@ -472,7 +478,7 @@ export default function CloserNet() {
         <div className="grid md:grid-cols-3 gap-6">
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
             <h3 className="text-2xl font-semibold mb-4">Escrow Protection</h3>
-            <p className="text-zinc-400">Money is held safely until the buyer confirms they received the item. No more shipping without payment security.</p>
+            <p className="text-zinc-400">Stripe holds funds in escrow until the buyer confirms they received the item. No more shipping without payment security.</p>
           </div>
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
             <h3 className="text-2xl font-semibold mb-4">Fair for Both Sides</h3>
@@ -490,9 +496,9 @@ export default function CloserNet() {
         <h2 className="text-4xl font-semibold text-center mb-12">Frequently Asked Questions</h2>
         <div className="space-y-6">
           {[
-            ["How much does it cost to sell?", "About 5% total: 3% CloserNet platform fee + ~2% payment processing. See the fee breakdown above for examples."],
+            ["How much does it cost to sell?", "About 7.5% total: 4.5% CloserNet platform fee + 3% Stripe escrow & payment processing. That's roughly half what eBay keeps. See the fee breakdown above for examples."],
             ["How do I post an item?", "Seller accounts and checkout aren't live yet. Join the waitlist at the top of this page with your email — we'll invite early sellers when listing and escrow checkout launch."],
-            ["How does escrow work?", "Buyer pays at checkout and funds are held by CloserNet — not the seller. The seller ships once payment is secured. Funds release to the seller after the buyer confirms delivery. See the How Escrow Works section above for the full flow."],
+            ["How does escrow work?", "Buyer pays at checkout and funds are held by Stripe, our escrow agent — not the seller. CloserNet facilitates the transaction; Stripe secures and releases payment after the buyer confirms delivery. See the How Escrow Works section above for the full flow."],
             ["What happens if the buyer claims the item wasn't as described?", "Either party can open a dispute before funds are released. We may ask for photos, tracking, and messages from both sides, then decide on a full refund, partial refund, or release to the seller based on the evidence. Chargebacks opened outside this process may result in account suspension."],
             ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
             ["What is CloserValue AI?", "A pricing helper that uses sample category averages to suggest a ballpark range. Use it as a starting point and verify with your own research before listing."],

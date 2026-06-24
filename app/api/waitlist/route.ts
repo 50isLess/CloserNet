@@ -43,7 +43,7 @@ export async function POST(request: Request) {
             <h1 style="font-size: 24px; font-weight: 600; margin-bottom: 16px;">You're on the list</h1>
             <p style="color: #52525b; line-height: 1.6; margin-bottom: 16px;">
               Thanks for joining the CloserNet early access waitlist. We're building a peer-to-peer marketplace
-              with escrow protection and ~5% total seller fees — and you'll be among the first to know when we launch.
+              with Stripe escrow protection and ~7.5% total seller fees — and you'll be among the first to know when we launch.
             </p>
             <p style="color: #52525b; line-height: 1.6;">
               We'll email you when seller accounts and checkout go live. No spam — just launch updates.

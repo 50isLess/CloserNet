@@ -18,21 +18,21 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "CloserNet — Peer-to-Peer Marketplace with Escrow & Low Fees",
   description:
-    "Sell used goods on CloserNet with ~5% total fees, built-in escrow protection, and smart shipping estimates. A simpler alternative to eBay for collectibles, electronics, and more.",
+    "Sell used goods on CloserNet with ~7.5% total fees including Stripe escrow — roughly half what eBay keeps. Smart shipping estimates for collectibles, electronics, and more.",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: siteUrl,
     title: "CloserNet — Closer to Real Value. Protected by Escrow.",
     description:
-      "Peer-to-peer marketplace with ~5% total fees, escrow protection, and shipping tools built in.",
+      "Peer-to-peer marketplace with ~7.5% total fees, Stripe escrow, and shipping tools built in.",
     siteName: "CloserNet",
   },
   twitter: {
     card: "summary_large_image",
     title: "CloserNet — Closer to Real Value. Protected by Escrow.",
     description:
-      "Peer-to-peer marketplace with ~5% total fees, escrow protection, and shipping tools built in.",
+      "Peer-to-peer marketplace with ~7.5% total fees, Stripe escrow, and shipping tools built in.",
   },
 };
 
