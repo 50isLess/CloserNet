@@ -4,20 +4,27 @@ import {
   parseCloserValueResponse,
 } from "@/lib/closervalue";
 
+export const runtime = "nodejs";
+
 const XAI_API_URL = "https://api.x.ai/v1/chat/completions";
 
 export async function GET() {
+  const apiKey = process.env.XAI_API_KEY?.trim();
   return NextResponse.json({
-    configured: Boolean(process.env.XAI_API_KEY),
-    model: process.env.XAI_MODEL ?? "grok-3-mini",
+    configured: Boolean(apiKey),
+    model: process.env.XAI_MODEL?.trim() ?? "grok-3-mini",
   });
 }
 
 export async function POST(request: Request) {
-  const apiKey = process.env.XAI_API_KEY;
+  const apiKey = process.env.XAI_API_KEY?.trim();
+
   if (!apiKey) {
     return NextResponse.json(
-      { error: "CloserValue AI is not configured yet. Please try again later." },
+      {
+        error:
+          "CloserValue AI is not configured. Add XAI_API_KEY in Vercel → Settings → Environment Variables (Production), then redeploy.",
+      },
       { status: 503 }
     );
   }
@@ -45,12 +52,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Title must be 200 characters or fewer." }, { status: 400 });
   }
 
-  const model = process.env.XAI_MODEL ?? "grok-3-mini";
+  const model = process.env.XAI_MODEL?.trim() ?? "grok-3-mini";
 
   const requestBody: Record<string, unknown> = {
     model,
     temperature: 0.3,
-    max_completion_tokens: 400,
+    max_completion_tokens: 500,
     messages: [
       { role: "system", content: CLOSERVALUE_SYSTEM_PROMPT },
       {
@@ -82,6 +89,14 @@ export async function POST(request: Request) {
     if (!response.ok) {
       const errText = await response.text();
       console.error("xAI API error:", response.status, errText);
+
+      if (response.status === 401) {
+        return NextResponse.json(
+          { error: "Invalid XAI_API_KEY. Generate a new key at console.x.ai and update Vercel." },
+          { status: 502 }
+        );
+      }
+
       return NextResponse.json(
         { error: "Unable to generate an estimate right now. Please try again." },
         { status: 502 }
@@ -93,7 +108,7 @@ export async function POST(request: Request) {
 
     if (!content || typeof content !== "string") {
       return NextResponse.json(
-        { error: "Received an empty response from the pricing model." },
+        { error: "Received an empty response from Grok." },
         { status: 502 }
       );
     }

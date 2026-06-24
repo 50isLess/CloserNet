@@ -2,6 +2,7 @@ export interface CloserValueResult {
   low: number;
   high: number;
   message: string;
+  reason?: string;
   confidence?: "low" | "medium" | "high";
 }
 
@@ -29,20 +30,23 @@ export function parseCloserValueResponse(content: string): CloserValueResult {
       ? parsed.message.trim()
       : `Suggested range for this item: $${low} – $${high}.`;
 
+  const reason =
+    typeof parsed.reason === "string" && parsed.reason.trim() ? parsed.reason.trim() : undefined;
+
   const confidence = parsed.confidence;
   const validConfidence =
     confidence === "low" || confidence === "medium" || confidence === "high"
       ? confidence
       : undefined;
 
-  return { low, high, message, confidence: validConfidence };
+  return { low, high, message, reason, confidence: validConfidence };
 }
 
 export const CLOSERVALUE_SYSTEM_PROMPT = `You are CloserValue AI, a pricing assistant for CloserNet, a US peer-to-peer used goods marketplace.
 Estimate a fair USD resale price range for a used item in good condition sold by an individual seller.
 When possible, ground your estimate in realistic market comps (eBay sold listings, Mercari, Facebook Marketplace, etc.).
 Respond with ONLY valid JSON — no markdown, no extra text:
-{"low": number, "high": number, "message": "one concise sentence explaining the estimate", "confidence": "low"|"medium"|"high"}
+{"low": number, "high": number, "message": "one concise sentence summary", "reason": "2-3 sentences explaining comps and pricing logic", "confidence": "low"|"medium"|"high"}
 Rules:
 - low and high must be positive integers (USD)
 - high must be >= low

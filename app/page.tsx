@@ -76,6 +76,16 @@ export default function CloserNet() {
   const [aiInput, setAiInput] = useState({ title: "", category: "Audio" });
   const [aiStatus, setAiStatus] = useState<"idle" | "loading" | "error">("idle");
   const [aiError, setAiError] = useState("");
+  const [showGrokPrompt, setShowGrokPrompt] = useState(false);
+  const [grokPrompt, setGrokPrompt] = useState("");
+
+  const [userListings, setUserListings] = useState<Listing[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [newItem, setNewItem] = useState({
+    title: "", price: "", description: "", category: "Audio", image: "",
+    weight: "", length: "", width: "", height: "", insurance: false, selectedShipping: ""
+  });
+  const [shippingRates, setShippingRates] = useState<{ method: string; cost: number; days: string }[]>([]);
 
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -120,7 +130,70 @@ export default function CloserNet() {
     }
   };
 
-  const filteredListings = DEMO_LISTINGS.filter(listing => {
+  const calculateShippingRates = (weight: number, length: number, width: number, height: number) => {
+    if (!weight || weight <= 0) return [];
+    const dimensionalWeight = Math.ceil((length * width * height) / 166);
+    const billableWeight = Math.max(weight, dimensionalWeight);
+    return [
+      { method: "USPS Ground", cost: Math.round(Math.max(7, billableWeight * 3.6)), days: "2–5 business days" },
+      { method: "UPS Ground", cost: Math.round(Math.max(9, billableWeight * 4.3)), days: "1–5 business days" },
+      { method: "FedEx Ground", cost: Math.round(Math.max(10, billableWeight * 4.6)), days: "1–5 business days" },
+    ];
+  };
+
+  const handleShippingInputsChange = () => {
+    const w = parseFloat(newItem.weight) || 0;
+    const l = parseFloat(newItem.length) || 0;
+    const wi = parseFloat(newItem.width) || 0;
+    const h = parseFloat(newItem.height) || 0;
+    if (w > 0 && l > 0 && wi > 0 && h > 0) {
+      setShippingRates(calculateShippingRates(w, l, wi, h));
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newItem.title || !newItem.price || !newItem.selectedShipping) return;
+
+    const w = parseFloat(newItem.weight) || 1;
+    const l = parseFloat(newItem.length) || 8;
+    const wi = parseFloat(newItem.width) || 6;
+    const h = parseFloat(newItem.height) || 4;
+    const rates = calculateShippingRates(w, l, wi, h);
+    const selectedRate = rates.find(r => r.method === newItem.selectedShipping);
+    const itemValue = parseFloat(newItem.price);
+    const insuranceCost = newItem.insurance ? Math.ceil(itemValue * 0.015) : 0;
+
+    const listing: Listing = {
+      id: Date.now(),
+      title: newItem.title,
+      price: itemValue,
+      description: newItem.description,
+      category: newItem.category,
+      image: newItem.image || "/listings/sony-wh1000xm5.jpg",
+      shippingCost: selectedRate ? selectedRate.cost : 10,
+      shippingMethod: newItem.selectedShipping,
+      weight: w,
+      dimensions: `${l} × ${wi} × ${h}`,
+      insurance: newItem.insurance,
+      insuranceCost,
+    };
+
+    setUserListings([listing, ...userListings]);
+    setNewItem({ title: "", price: "", description: "", category: "Audio", image: "", weight: "", length: "", width: "", height: "", insurance: false, selectedShipping: "" });
+    setShippingRates([]);
+    setShowForm(false);
+  };
+
+  const generateResearchPrompt = () => {
+    const prompt = `I'm researching a fair price for a "${aiInput.title}" (${aiInput.category}). What price range would you expect for a used item in good condition based on current market comps on eBay, Mercari, and Facebook Marketplace?`;
+    setGrokPrompt(prompt);
+    setShowGrokPrompt(true);
+  };
+
+  const allListings = [...userListings, ...DEMO_LISTINGS];
+
+  const filteredListings = allListings.filter(listing => {
     const matchesSearch = listing.title.toLowerCase().includes(searchTerm.toLowerCase()) || listing.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === "All" || listing.category === selectedCategory;
     return matchesSearch && matchesCategory;
@@ -350,56 +423,84 @@ export default function CloserNet() {
       </section>
 
       {/* CloserValue AI */}
-      <section id="value" className="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-14 border-t border-zinc-800 bg-zinc-900">
-        <div className="text-center mb-8">
+      <section id="value" className="relative max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16 border-t border-zinc-800 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-emerald-950/20 via-zinc-900 to-zinc-950 pointer-events-none" />
+        <div className="relative text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-800/40 text-emerald-300 text-xs mb-4">
+            Powered by Grok
+          </div>
           <h2 className="text-3xl sm:text-4xl font-semibold mb-3">CloserValue AI</h2>
           <p className="text-zinc-300 max-w-lg mx-auto">
             Enter your item title and category — Grok analyzes market comps to suggest a fair price range before you list.
           </p>
         </div>
 
-        <div className="max-w-md mx-auto bg-zinc-950 border border-zinc-800 rounded-2xl p-5 sm:p-8">
+        <div className="relative max-w-md mx-auto bg-zinc-950/90 border border-zinc-700/80 rounded-2xl p-5 sm:p-8 shadow-xl shadow-black/40 ring-1 ring-white/5">
           <div className="space-y-4">
             <input
               type="text"
-              placeholder="Item title"
+              placeholder="Item title (e.g. Sony WH-1000XM5)"
               value={aiInput.title}
               onChange={(e) => setAiInput({ ...aiInput, title: e.target.value })}
               disabled={aiStatus === "loading"}
-              className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg disabled:opacity-50"
+              className="w-full bg-zinc-900 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-emerald-600/50 focus:ring-1 focus:ring-emerald-600/30 disabled:opacity-50 transition-colors"
             />
             <select
               value={aiInput.category}
               onChange={(e) => setAiInput({ ...aiInput, category: e.target.value })}
               disabled={aiStatus === "loading"}
-              className="w-full bg-zinc-900 border border-zinc-800 p-3 rounded-lg disabled:opacity-50"
+              className="w-full bg-zinc-900 border border-zinc-700 p-3 rounded-lg focus:outline-none focus:border-emerald-600/50 disabled:opacity-50 transition-colors"
             >
               {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
             </select>
             <button
               onClick={getCloserValue}
               disabled={aiStatus === "loading" || !aiInput.title.trim()}
-              className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200 disabled:opacity-50"
+              className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200 disabled:opacity-50 transition-colors"
             >
-              {aiStatus === "loading" ? "Analyzing…" : "Get Estimate"}
+              {aiStatus === "loading" ? "Grok is analyzing…" : "Get Demo Estimate"}
             </button>
           </div>
 
+          {aiStatus === "loading" && (
+            <div className="mt-4 flex items-center justify-center gap-2 text-sm text-zinc-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              Querying Grok for market comps…
+            </div>
+          )}
+
           {aiError && (
-            <p className="mt-4 text-sm text-red-400">{aiError}</p>
+            <p className="mt-4 text-sm text-red-400 bg-red-950/30 border border-red-900/50 rounded-lg p-3">{aiError}</p>
           )}
 
           {aiResult && (
-            <div className="mt-6 p-5 bg-zinc-900 border border-zinc-800 rounded-xl">
+            <div className="mt-6 p-5 bg-zinc-900 border border-emerald-800/40 rounded-xl ring-1 ring-emerald-900/20">
               {aiResult.confidence && (
-                <div className="text-xs uppercase tracking-wide text-zinc-500 mb-2">
+                <div className="text-xs uppercase tracking-wide text-emerald-400/80 mb-2">
                   Confidence: {aiResult.confidence}
                 </div>
               )}
-              <div className="text-3xl font-semibold mb-2">${aiResult.low} – ${aiResult.high}</div>
-              <p className="text-sm text-zinc-400 mb-4">{aiResult.message}</p>
-              <p className="text-xs text-zinc-500 leading-relaxed">
-                * AI estimate powered by Grok. Based on market knowledge and available data — not a guarantee. Verify before listing.
+              <div className="text-3xl font-semibold mb-2 text-white">${aiResult.low} – ${aiResult.high}</div>
+              <p className="text-sm text-zinc-300 mb-3">{aiResult.message}</p>
+              {aiResult.reason && (
+                <p className="text-sm text-zinc-400 mb-4 leading-relaxed border-t border-zinc-800 pt-3">{aiResult.reason}</p>
+              )}
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button
+                  onClick={generateResearchPrompt}
+                  className="flex-1 py-2.5 border border-zinc-600 rounded-full text-sm hover:bg-zinc-800 transition-colors"
+                >
+                  Ask Grok
+                </button>
+                <button
+                  onClick={() => { setShowForm(true); document.getElementById("post")?.scrollIntoView({ behavior: "smooth" }); }}
+                  className="flex-1 py-2.5 bg-zinc-800 border border-zinc-600 rounded-full text-sm hover:bg-zinc-700 transition-colors"
+                >
+                  Preview Listing
+                </button>
+              </div>
+              <p className="text-xs text-zinc-500 leading-relaxed mt-4">
+                * AI estimate powered by Grok via xAI. Not a guarantee — verify before listing.
               </p>
             </div>
           )}
@@ -542,11 +643,17 @@ export default function CloserNet() {
             <h2 className="text-2xl sm:text-3xl font-semibold">Browse Listings</h2>
             <p className="text-zinc-400 text-sm mt-2">
               Sample listings below show what the marketplace will look like at launch.
+              {userListings.length > 0 && <> You have {userListings.length} preview listing{userListings.length !== 1 ? "s" : ""}.</>}
             </p>
           </div>
-          <button onClick={scrollToWaitlist} className="px-6 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200 whitespace-nowrap">
-            Join the Waitlist
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button onClick={() => { setShowForm(true); document.getElementById("post")?.scrollIntoView({ behavior: "smooth" }); }} className="px-5 py-2.5 border border-zinc-600 rounded-full text-sm hover:bg-zinc-900 whitespace-nowrap">
+              Post Item (Preview)
+            </button>
+            <button onClick={scrollToWaitlist} className="px-6 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200 whitespace-nowrap">
+              Join the Waitlist
+            </button>
+          </div>
         </div>
 
         {filteredListings.length === 0 ? (
@@ -554,12 +661,18 @@ export default function CloserNet() {
         ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredListings.map((listing) => (
-            <div key={listing.id} className="bg-zinc-900 border border-amber-900/50 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
+            <div key={listing.id} className={`bg-zinc-900 border rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors ${listing.isDemo ? "border-amber-900/50" : "border-zinc-700 ring-1 ring-white/5"}`}>
               <div className="relative">
                 <img src={listing.image} alt={listing.title} className="w-full h-48 object-cover" />
-                <span className="absolute top-3 left-3 text-xs px-2.5 py-1 bg-amber-900/90 border border-amber-700 text-amber-100 rounded-full">
-                  Sample listing
-                </span>
+                {listing.isDemo ? (
+                  <span className="absolute top-3 left-3 text-xs px-2.5 py-1 bg-amber-900/90 border border-amber-700 text-amber-100 rounded-full">
+                    Sample listing
+                  </span>
+                ) : (
+                  <span className="absolute top-3 left-3 text-xs px-2.5 py-1 bg-zinc-800/90 border border-zinc-600 text-zinc-200 rounded-full">
+                    Your preview
+                  </span>
+                )}
               </div>
               <div className="p-5 sm:p-6">
                 <div className="flex justify-between items-start gap-3 mb-3">
@@ -599,6 +712,68 @@ export default function CloserNet() {
         )}
       </section>
 
+      {/* Post Item Preview Form */}
+      <section id="post" className="max-w-xl mx-auto px-4 sm:px-6 py-12 border-t border-zinc-800">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-semibold">Post an Item</h2>
+            <p className="text-zinc-400 text-sm mt-2">Preview flow — saves locally on this page until checkout launches.</p>
+          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-5 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:bg-zinc-200 whitespace-nowrap"
+          >
+            {showForm ? "Close Form" : "Open Form"}
+          </button>
+        </div>
+
+        {showForm && (
+          <form onSubmit={handleSubmit} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 sm:p-8 space-y-4 shadow-lg shadow-black/20">
+            <input type="text" placeholder="Item Title" value={newItem.title} onChange={(e) => setNewItem({...newItem, title: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg" required />
+            <input type="number" placeholder="Price ($)" value={newItem.price} onChange={(e) => setNewItem({...newItem, price: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg" required />
+            <select value={newItem.category} onChange={(e) => setNewItem({...newItem, category: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg">
+              {categories.filter(c => c !== "All").map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+            <div className="grid grid-cols-2 gap-4">
+              <input type="number" step="0.1" placeholder="Weight (lbs)" value={newItem.weight} onChange={(e) => { setNewItem({...newItem, weight: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
+              <div className="grid grid-cols-3 gap-2">
+                <input type="number" placeholder="L" value={newItem.length} onChange={(e) => { setNewItem({...newItem, length: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
+                <input type="number" placeholder="W" value={newItem.width} onChange={(e) => { setNewItem({...newItem, width: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
+                <input type="number" placeholder="H" value={newItem.height} onChange={(e) => { setNewItem({...newItem, height: e.target.value}); handleShippingInputsChange(); }} className="bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
+              </div>
+            </div>
+            {shippingRates.length > 0 && (
+              <div className="bg-zinc-950 border border-zinc-700 rounded-xl p-4">
+                <p className="text-sm text-zinc-400 mb-3">Estimated shipping rates:</p>
+                {shippingRates.map((rate) => (
+                  <button
+                    key={rate.method}
+                    type="button"
+                    onClick={() => setNewItem({ ...newItem, selectedShipping: rate.method })}
+                    className={`w-full flex justify-between items-center p-3 rounded-lg mb-2 transition-colors ${newItem.selectedShipping === rate.method ? "bg-white text-black" : "hover:bg-zinc-800"}`}
+                  >
+                    <div className="text-left">
+                      <div className="font-medium">{rate.method}</div>
+                      <div className="text-xs opacity-70">{rate.days}</div>
+                    </div>
+                    <div className="font-semibold">${rate.cost}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+            <label className="flex items-center gap-3 bg-zinc-950 border border-zinc-700 p-4 rounded-lg cursor-pointer">
+              <input type="checkbox" checked={newItem.insurance} onChange={(e) => setNewItem({...newItem, insurance: e.target.checked})} className="w-4 h-4" />
+              <span className="text-sm">Add shipping insurance (recommended over $100)</span>
+            </label>
+            <input type="text" placeholder="Image URL (optional)" value={newItem.image} onChange={(e) => setNewItem({...newItem, image: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg" />
+            <textarea placeholder="Description" value={newItem.description} onChange={(e) => setNewItem({...newItem, description: e.target.value})} className="w-full bg-zinc-950 border border-zinc-700 p-3 rounded-lg h-24" />
+            <button type="submit" disabled={!newItem.selectedShipping} className="w-full bg-white text-black py-3 rounded-full font-medium hover:bg-zinc-200 disabled:opacity-50">
+              Post Item (Preview)
+            </button>
+          </form>
+        )}
+      </section>
+
       <footer className="border-t border-zinc-800 py-10 px-4 text-center text-sm text-zinc-500">
         <p className="mb-3 text-balance">CloserNet • Lower Fees • Escrow Protected • Smart Shipping</p>
         <div className="flex flex-col sm:flex-row flex-wrap justify-center gap-3 sm:gap-6">
@@ -607,6 +782,20 @@ export default function CloserNet() {
           <a href="mailto:support@closernet.net" className="hover:text-zinc-300">Contact</a>
         </div>
       </footer>
+
+      {showGrokPrompt && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-5 sm:p-8 max-w-lg w-full shadow-2xl">
+            <h3 className="text-xl font-semibold mb-2">Ask Grok</h3>
+            <p className="text-zinc-400 text-sm mb-4">Copy this prompt into Grok for deeper market research.</p>
+            <div className="bg-zinc-950 p-4 rounded-lg text-sm mb-6 border border-zinc-800 max-h-48 overflow-y-auto">{grokPrompt}</div>
+            <div className="flex gap-3">
+              <button onClick={() => { navigator.clipboard.writeText(grokPrompt); }} className="flex-1 py-3 bg-white text-black rounded-full font-medium hover:bg-zinc-200">Copy Prompt</button>
+              <button onClick={() => setShowGrokPrompt(false)} className="flex-1 py-3 border border-zinc-700 rounded-full hover:bg-zinc-800">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </main>
   );
