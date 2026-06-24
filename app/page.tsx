@@ -23,7 +23,7 @@ export default function CloserNet() {
       id: 1,
       title: "Sony WH-1000XM5 Headphones",
       price: 280,
-      description: "Excellent condition. Barely used.",
+      description: "Excellent condition. Barely used. Original box included.",
       category: "Audio",
       image: "https://picsum.photos/id/1015/400/300",
       shippingCost: 12,
@@ -31,7 +31,35 @@ export default function CloserNet() {
       weight: 2,
       dimensions: "10 × 8 × 4",
       insurance: true,
-      insuranceCost: 3
+      insuranceCost: 4
+    },
+    {
+      id: 2,
+      title: "The Dark Side of the Moon - Pink Floyd (Vinyl)",
+      price: 45,
+      description: "Original pressing in great shape.",
+      category: "Vinyl",
+      image: "https://picsum.photos/id/1016/400/300",
+      shippingCost: 8,
+      shippingMethod: "USPS Ground",
+      weight: 1.2,
+      dimensions: "12 × 12 × 1",
+      insurance: false,
+      insuranceCost: 0
+    },
+    {
+      id: 3,
+      title: "MacBook Pro 16\" M3 Max",
+      price: 2450,
+      description: "2024 model. 64GB RAM, 1TB SSD. Like new.",
+      category: "Electronics",
+      image: "https://picsum.photos/id/201/400/300",
+      shippingCost: 28,
+      shippingMethod: "UPS Ground",
+      weight: 7,
+      dimensions: "14 × 10 × 3",
+      insurance: true,
+      insuranceCost: 37
     }
   ]);
 
@@ -124,6 +152,7 @@ export default function CloserNet() {
     if (lower.includes("leica")) basePrice *= 2.3;
     if (lower.includes("macbook")) basePrice *= 1.75;
     if (lower.includes("headphones")) basePrice *= 1.3;
+    if (lower.includes("vinyl")) basePrice *= 1.35;
 
     const low = Math.round(basePrice * 0.82);
     const high = Math.round(basePrice * 1.18);
@@ -197,11 +226,15 @@ export default function CloserNet() {
 
       {/* Hero */}
       <section className="max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
+        <div className="inline-block px-4 py-1 bg-zinc-900 rounded-full text-sm mb-6 border border-zinc-800">
+          Now with AI-powered pricing
+        </div>
         <h1 className="text-6xl md:text-7xl font-semibold tracking-tighter mb-6">
           Closer to real value.<br />Protected by escrow.
         </h1>
         <p className="text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-          A simpler peer-to-peer marketplace with ~5% total fees.
+          A simpler peer-to-peer marketplace. Only ~5% total fees.<br />
+          Keep more of your money with built-in escrow protection.
         </p>
         <div className="flex gap-4 justify-center">
           <button onClick={() => setShowForm(true)} className="px-8 py-3.5 bg-white text-black rounded-full text-lg font-medium hover:bg-zinc-200">
@@ -280,6 +313,7 @@ export default function CloserNet() {
                 ["Shipping Rates", "Calculated from weight & dimensions", "Seller figures it out"],
                 ["Experience", "Simple & modern", "Complex with many rules"],
                 ["Seller Payout", "~95% of sale", "~87% of sale"],
+                ["Best For", "Used goods & collectibles", "New retail + auctions"],
               ].map(([feature, closer, ebay], i) => (
                 <tr key={i} className="hover:bg-zinc-900/50">
                   <td className="p-6 font-medium">{feature}</td>
@@ -295,10 +329,14 @@ export default function CloserNet() {
       {/* Trust & Safety */}
       <section className="max-w-5xl mx-auto px-6 py-16 border-t border-zinc-800 bg-zinc-900">
         <h2 className="text-4xl font-semibold text-center mb-12">Trust & Safety Built In</h2>
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-3 gap-6">
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
             <h3 className="text-2xl font-semibold mb-4">Escrow Protection</h3>
             <p className="text-zinc-400">Money is held safely until the buyer confirms they received the item. No more shipping without payment security.</p>
+          </div>
+          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
+            <h3 className="text-2xl font-semibold mb-4">Fair for Both Sides</h3>
+            <p className="text-zinc-400">Buyers get protection. Sellers get paid reliably. We built CloserNet to reduce risk for everyone involved.</p>
           </div>
           <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-8">
             <h3 className="text-2xl font-semibold mb-4">Shipping + Insurance</h3>
@@ -337,6 +375,9 @@ export default function CloserNet() {
 
         <h2 className="text-3xl font-semibold mb-8">Featured Listings</h2>
 
+        {filteredListings.length === 0 ? (
+          <p className="text-center text-zinc-400 py-10">No listings found.</p>
+        ) : (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredListings.map((listing) => (
             <div key={listing.id} className="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden hover:border-zinc-700 transition-colors">
@@ -373,6 +414,7 @@ export default function CloserNet() {
             </div>
           ))}
         </div>
+        )}
       </section>
 
       {/* Post Form with Dimensions + Insurance */}
