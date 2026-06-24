@@ -394,11 +394,11 @@ export default function CloserNet() {
       </section>
 
       {/* Comparison Section */}
-      <section id="compare" className="max-w-6xl mx-auto px-6 py-16 border-t border-zinc-800">
+      <section id="compare" className="max-w-7xl mx-auto px-6 py-16 border-t border-zinc-800">
         <h2 className="text-4xl font-semibold text-center mb-4">Why Sellers Choose CloserNet</h2>
         <p className="text-center text-zinc-400 mb-12">See how we compare to the biggest alternatives.</p>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-6">
             <h3 className="text-xl font-semibold mb-4 text-green-400">CloserNet</h3>
             <ul className="space-y-2 text-sm">
@@ -437,6 +437,16 @@ export default function CloserNet() {
               <li>No built-in escrow</li>
               <li>Buyer protection varies by case</li>
               <li>~90% payout to seller</li>
+            </ul>
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+            <h3 className="text-xl font-semibold mb-4">OfferUp</h3>
+            <ul className="space-y-2 text-sm text-zinc-400">
+              <li>Low fees but limited protection</li>
+              <li>Mostly local transactions</li>
+              <li>Weak buyer/seller safeguards</li>
+              <li>Basic shipping options</li>
             </ul>
           </div>
         </div>
