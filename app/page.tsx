@@ -322,8 +322,9 @@ export default function CloserNet() {
               <div>
                 <p className="font-medium text-emerald-100 mb-1">You&apos;re on the waitlist</p>
                 <p className="text-sm text-emerald-200/90 leading-relaxed">{waitlistMessage}</p>
-                <p className="text-xs text-emerald-300/70 mt-3">
-                  We&apos;ll only email you about launch updates — no spam.
+                <p className="text-xs text-emerald-300/70 mt-3 leading-relaxed">
+                  Subject: <strong className="font-medium text-emerald-200/90">You&apos;re on the CloserNet waitlist</strong>
+                  {" "}— check spam/promotions if you don&apos;t see it within a few minutes.
                 </p>
               </div>
             </div>
