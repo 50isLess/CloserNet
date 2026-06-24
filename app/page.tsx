@@ -481,10 +481,7 @@ export default function CloserNet() {
                 </div>
               )}
               <div className="text-3xl font-semibold mb-2 text-white">${aiResult.low} – ${aiResult.high}</div>
-              <p className="text-sm text-zinc-300 mb-3">{aiResult.message}</p>
-              {aiResult.reason && (
-                <p className="text-sm text-zinc-400 mb-4 leading-relaxed border-t border-zinc-800 pt-3">{aiResult.reason}</p>
-              )}
+              <p className="text-sm text-zinc-300 mb-4 leading-relaxed">{aiResult.reason}</p>
               <div className="flex flex-col sm:flex-row gap-2">
                 <button
                   onClick={generateResearchPrompt}
