@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { sanitizeReferral } from "@/lib/referral";
 import { addToWaitlist } from "@/lib/waitlist";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -32,7 +33,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  let body: { email?: string };
+  let body: { email?: string; ref?: string };
 
   try {
     body = await request.json();
@@ -47,7 +48,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { duplicate } = await addToWaitlist(email);
+    const ref = sanitizeReferral(body.ref);
+    const { duplicate } = await addToWaitlist(email, ref);
 
     if (duplicate) {
       return NextResponse.json(
@@ -101,11 +103,12 @@ export async function POST(request: Request) {
     }
 
     const notifyEmail = process.env.WAITLIST_NOTIFY_EMAIL ?? "support@closernet.net";
+    const refLine = ref ? `\nReferral: ${ref}` : "";
     const notification = await resend.emails.send({
       from,
       to: notifyEmail,
-      subject: `New waitlist signup: ${email}`,
-      text: `New early access signup: ${email}`,
+      subject: `New waitlist signup: ${email}${ref ? ` (via ${ref})` : ""}`,
+      text: `New early access signup: ${email}${refLine}`,
     });
 
     if (notification.error) {

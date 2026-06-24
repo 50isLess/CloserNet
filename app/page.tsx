@@ -1,9 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { ForumPartners } from '@/components/ForumPartners';
 import { Navbar } from '@/components/Navbar';
 import type { CloserValueResult } from '@/lib/closervalue';
+import { sanitizeReferral } from '@/lib/referral';
+
+const REF_STORAGE_KEY = 'closernet_ref';
 
 interface Listing {
   id: number;
@@ -105,6 +109,19 @@ export default function CloserNet() {
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [waitlistStatus, setWaitlistStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [waitlistMessage, setWaitlistMessage] = useState("");
+  const [waitlistRef, setWaitlistRef] = useState<string | undefined>();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const fromUrl = sanitizeReferral(params.get("ref"));
+    if (fromUrl) {
+      localStorage.setItem(REF_STORAGE_KEY, fromUrl);
+      setWaitlistRef(fromUrl);
+      return;
+    }
+    const stored = sanitizeReferral(localStorage.getItem(REF_STORAGE_KEY));
+    if (stored) setWaitlistRef(stored);
+  }, []);
 
   const categories = ["All", "Audio", "Electronics", "Photography", "Collectibles", "Clothes", "Books", "Vinyl", "DVD", "CDs", "Other"];
 
@@ -126,7 +143,7 @@ export default function CloserNet() {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: waitlistEmail }),
+        body: JSON.stringify({ email: waitlistEmail, ref: waitlistRef }),
       });
       const data = await res.json();
 
@@ -640,6 +657,8 @@ export default function CloserNet() {
         </p>
       </section>
 
+      <ForumPartners />
+
       {/* Trust & Safety */}
       <section className="max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-16 border-t border-zinc-800 bg-zinc-900">
         <h2 className="text-3xl sm:text-4xl font-semibold text-center mb-8 sm:mb-12">Trust & Safety Built In</h2>
@@ -670,6 +689,7 @@ export default function CloserNet() {
             ["What happens if the buyer claims the item wasn't as described?", "Either party can open a dispute before funds are released. We may ask for photos, tracking, and messages from both sides, then decide on a full refund, partial refund, or release to the seller based on the evidence. Chargebacks opened outside this process may result in account suspension."],
             ["How are shipping rates calculated?", "Enter your item's weight and dimensions. We estimate rates from USPS, UPS, and FedEx using billable weight (actual vs dimensional)."],
             ["What is CloserValue AI?", "An AI pricing helper powered by Grok that estimates a fair resale range based on your item title, category, and market comps. Use it as a starting point and verify with your own research before listing."],
+            ["Can forums or communities partner with CloserNet?", "Yes. Share a custom link like closernet.net/?ref=yourforum — signups are tagged automatically. Download the escrow badge from the Forums section and email support@closernet.net to discuss a pilot."],
           ].map(([question, answer], i) => (
             <div key={i} className="border border-zinc-800 rounded-2xl p-5 sm:p-6">
               <h4 className="font-semibold text-lg mb-2">{question}</h4>

@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: "#value", label: "CloserValue AI" },
   { href: "#fees", label: "Fees" },
   { href: "#compare", label: "Compare" },
+  { href: "#forums", label: "Forums" },
   { href: "#faq", label: "FAQ" },
 ];
 

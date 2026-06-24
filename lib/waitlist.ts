@@ -4,6 +4,7 @@ import path from "path";
 export interface WaitlistEntry {
   email: string;
   joinedAt: string;
+  ref?: string;
 }
 
 const WAITLIST_PATH = path.join(process.cwd(), "data", "waitlist.json");
@@ -17,7 +18,10 @@ export async function readWaitlist(): Promise<WaitlistEntry[]> {
   }
 }
 
-export async function addToWaitlist(email: string): Promise<{ duplicate: boolean }> {
+export async function addToWaitlist(
+  email: string,
+  ref?: string
+): Promise<{ duplicate: boolean }> {
   const normalized = email.toLowerCase().trim();
 
   try {
@@ -28,7 +32,9 @@ export async function addToWaitlist(email: string): Promise<{ duplicate: boolean
       return { duplicate: true };
     }
 
-    entries.push({ email: normalized, joinedAt: new Date().toISOString() });
+    const entry: WaitlistEntry = { email: normalized, joinedAt: new Date().toISOString() };
+    if (ref) entry.ref = ref;
+    entries.push(entry);
     await fs.writeFile(WAITLIST_PATH, JSON.stringify(entries, null, 2));
   } catch {
     // Vercel serverless has a read-only filesystem — admin notification email serves as backup record.
