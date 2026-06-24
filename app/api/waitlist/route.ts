@@ -4,6 +4,25 @@ import { addToWaitlist } from "@/lib/waitlist";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+export async function GET() {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const from = process.env.RESEND_FROM_EMAIL?.trim() ?? "CloserNet <onboarding@resend.dev>";
+  const notify = process.env.WAITLIST_NOTIFY_EMAIL?.trim() ?? "support@closernet.net";
+  const usingTestSender = from.includes("resend.dev");
+
+  return NextResponse.json({
+    configured: Boolean(apiKey),
+    from,
+    notify,
+    usingTestSender,
+    hint: !apiKey
+      ? "Add RESEND_API_KEY in Vercel or run npm run setup-resend locally."
+      : usingTestSender
+        ? "Test sender only delivers to your Resend account email. Verify closernet.net for real signups."
+        : "Ready to send confirmation emails to all waitlist signups.",
+  });
+}
+
 export async function POST(request: Request) {
   let body: { email?: string };
 
