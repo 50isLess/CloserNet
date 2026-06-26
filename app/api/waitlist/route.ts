@@ -17,6 +17,8 @@ export async function GET() {
 
   return NextResponse.json({
     configured: Boolean(apiKey),
+    host: process.env.VERCEL_URL ?? null,
+    project: process.env.VERCEL_PROJECT_PRODUCTION_URL ?? null,
     from,
     notify,
     usingTestSender,
@@ -56,13 +58,17 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.RESEND_API_KEY?.trim();
     if (!apiKey) {
-      return NextResponse.json({
-        message: duplicate
-          ? "You're already on the waitlist. We'll email you when early access opens."
-          : "You're in! We'll email you when seller accounts and checkout go live.",
-        emailSent: false,
-        duplicate,
-      });
+      console.error("Waitlist signup blocked: RESEND_API_KEY missing on this deployment.");
+      return NextResponse.json(
+        {
+          error:
+            "Waitlist email is not configured on this server. If you use closernet.net, point the domain to the main closernet Vercel project.",
+          hint: "Check https://closernet.vercel.app/api/waitlist — configured should be true. View logs at resend.com/emails.",
+          emailSent: false,
+          duplicate,
+        },
+        { status: 503 }
+      );
     }
 
     const from = process.env.RESEND_FROM_EMAIL ?? "CloserNet <support@closernet.net>";
